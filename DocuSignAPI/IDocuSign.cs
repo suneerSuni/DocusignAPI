@@ -15,7 +15,7 @@ namespace DocuSignAPI
     {
         
         [OperationContract]
-        string SendforESign(SendDocumentInfo docDetails,string placeHolderName, string saveFileAs , string tableStrXML , List<CLDocValue> value);
+        string SendforESign(SendDocumentInfo docDetails,string placeHolderName,  List<CLDocValue> value, List<SignerInfo> jointEmail , List<SignerInfo> cuEmail);
 
         // TODO: Add your service operations here
     }

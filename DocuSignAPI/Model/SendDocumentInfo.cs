@@ -11,6 +11,8 @@ namespace FillTheDoc.Model
         public string File_Sign { get; set; }
         public string FileType { get; set; }
         public List<SignerInfo> SignerDetails { get; set; }
+        public List<SignerInfo> JointSignerDetails { get; set; }
+        public List<SignerInfo> CUSignerDetails { get; set; }
 
     }
 
@@ -21,6 +23,9 @@ namespace FillTheDoc.Model
         public string ReciId { get; set; }
         public List<SignatureDetails> SignaturePosition { get; set; }
     }
+
+
+
     public class SignatureDetails
     {
         public string SignaturePos_X { get; set; }

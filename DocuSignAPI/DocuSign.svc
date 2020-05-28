@@ -1,1 +1,1 @@
-﻿<%@ ServiceHost Language="C#" Debug="true" Service="DocuSignAPI.Service1" CodeBehind="DocuSign.svc.cs" %>
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="DocuSignAPI.DocuSignService" CodeBehind="DocuSign.svc.cs" %>

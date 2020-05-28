@@ -3,6 +3,8 @@ using FillTheDoc.DAL;
 using FillTheDoc.Model;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
@@ -16,15 +18,23 @@ namespace DocuSignAPI
     public class DocuSignService : IDocuSignService
     {
 
-        public string SendforESign(SendDocumentInfo docDetails, string placeHolderName = "", string saveFileAs = "", string tableStrXML = "", List<CLDocValue> value = null)
+        public string SendforESign(SendDocumentInfo docDetails,  string tableStrXML = "", List<CLDocValue> value = null,List<SignerInfo> jointEmail = null, List<SignerInfo> cuEmail = null)
         {
             string DocuSignID=string.Empty;
             try
             {
-                string base64WordDoc = new WordReader().FillValuesToDoc(Convert.FromBase64String(docDetails.File_Sign), tableStrXML, value);
+                string base64WordDoc;
+                if (Convert.ToBoolean(ConfigurationManager.AppSettings["GetFileFromPath"]))
+                {
+                    base64WordDoc = Convert.ToBase64String(File.ReadAllBytes(string.Concat(ConfigurationManager.AppSettings["FilePath"])));
+                }
+                else
+                {
+                    base64WordDoc = docDetails.File_Sign;
+                }
                 DocuSignDAL dalObj = new DocuSignDAL();
-                docDetails.File_Sign = base64WordDoc;
-                DocuSignID= dalObj.SendforESign(docDetails);
+                docDetails.File_Sign = new WordReader().FillValuesToDoc(Convert.FromBase64String(base64WordDoc), tableStrXML, value);
+                DocuSignID = dalObj.SendforESign(docDetails, jointEmail, cuEmail);
                 return DocuSignID;
             }
             catch (Exception exception)
