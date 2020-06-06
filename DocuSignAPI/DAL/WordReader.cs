@@ -49,10 +49,11 @@ namespace FillTheDoc.DAL
             }
         }
 
-        public string FillValuesToDoc(byte[] fileString, string tableStrXML, List<CLDocValue> docVal)
+        public string FillValuesToDoc(byte[] fileString, string tableStrXML, SendDocumentInfo sDocInfo)
         {
             try
             {
+                List<CLDocValue> docVal = sDocInfo.DocuSignFields;
                 List<CLTableValue> tblDocVal = new List<CLTableValue>();
                 if (!string.IsNullOrEmpty(tableStrXML))
                 {

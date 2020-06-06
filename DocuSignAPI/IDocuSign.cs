@@ -15,7 +15,10 @@ namespace DocuSignAPI
     {
         
         [OperationContract]
-        string SendforESign(SendDocumentInfo docDetails, string signerInfoJSon, string tableStrXML,  List<CLDocValue> value,int jointCount, string Type);
+        string SendforESign(int id,int jointCount, string Type);
+
+        [OperationContract]
+        string FillDocument(int id, int jointCount = 0, string Type = "");
 
         [OperationContract]
         string test(string data);

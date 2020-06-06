@@ -23,6 +23,10 @@ namespace FillTheDoc.Model
         //[DataMember]
         public List<SignerInfo> CUSignerDetails { get; set; }
 
+        public List<CLDocValue> DocuSignFields { get; set; }
+
+        public string FileBase64String { get; set; }
+
     }
     [DataContract]
     public class SignerInfo
@@ -464,5 +468,7 @@ namespace FillTheDoc.Model
 
 
     }
+
+    
 
 }

@@ -68,7 +68,7 @@ namespace FillTheDoc.Utils
 
         }
 
-        public List<DocumentFields> ReadDocuSignData(string selectStatus)
+        public List<DocumentFields> ReadDocuSignData(int id)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace FillTheDoc.Utils
                     SqlCommand sql_cmnd = new SqlCommand(_selectDocuSignDataProcName, _sqlCon);
                     sql_cmnd.CommandType = CommandType.StoredProcedure;
 
-                    sql_cmnd.Parameters.AddWithValue("@Status", SqlDbType.VarChar).Value = selectStatus;
+                    sql_cmnd.Parameters.AddWithValue("@PrimarySSNID", SqlDbType.VarChar).Value = id;
 
                     SqlDataReader reader = sql_cmnd.ExecuteReader();
                     DocumentFields data = null;
@@ -162,8 +162,8 @@ namespace FillTheDoc.Utils
             }
             catch (Exception ex)
             {
-                Utility.LogAction("Fetching DocuSign data for status " + selectStatus + " failed with error " + ex.Message);
-                return new List<PPPClosing>();
+                Utility.LogAction("Fetching DocuSign data for status " + id + " failed with error " + ex.Message);
+                return new List<DocumentFields>();
             }
         }
 

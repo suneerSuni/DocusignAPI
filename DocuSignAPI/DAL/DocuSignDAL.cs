@@ -72,7 +72,7 @@ namespace FillTheDoc.DAL
                 if (Utility.IsEventLogged) Utility.LogAction("Creating document object");
 
                 Document doc = new Document();
-                doc.DocumentBase64 = docDetails.File_Sign;
+                doc.DocumentBase64 = docDetails.FileBase64String;
                 doc.Name = ConfigurationManager.AppSettings["DocumentName"];
                 doc.DocumentId = "1";
                 doc.FileExtension = "docx";
@@ -82,55 +82,54 @@ namespace FillTheDoc.DAL
 
                 envDef.Recipients = new Recipients();
                 envDef.Recipients.Signers = new List<Signer>();
-                
 
                 if (Utility.IsEventLogged) Utility.LogAction("Creating recipient and sign tabs");
 
                 foreach (var reci in docDetails.SignerDetails)
                 {
                     Signer signer = new Signer();
+                    signer.Tabs = new Tabs();
+                    signer.Tabs.SignHereTabs = new List<SignHere>();
 
                     signer.Name = reci.ReciName;
                     signer.Email = reci.ReciEmail;
                     signer.RecipientId = reci.ReciId;
                     signer.RoutingOrder = reci.ReciId;
-                    //signer.IdCheckConfigurationName= "ID Check";
-                    signer.Tabs = new Tabs();
-                    signer.Tabs.SignHereTabs = new List<SignHere>();
-                    SignHere signHere = new SignHere();
 
+                    SignHere signHere = new SignHere();
                     signHere.DocumentId = "1";
-                    signHere.RecipientId = "1";
+                    signHere.RecipientId = reci.ReciId;
                     signHere.AnchorString = "member$ign";
                     signHere.AnchorXOffset = "0";
                     signHere.AnchorYOffset = "0";
                     signHere.AnchorUnits = "inches";
                     signHere.AnchorIgnoreIfNotPresent = "false";
+
                     signer.Tabs.SignHereTabs.Add(signHere);
                     envDef.Recipients.Signers.Add(signer);
-                    int jointOwnerCount = 0;
-                    if (docDetails.JointSignerDetails != null && docDetails.JointSignerDetails.Count>0)
+
+                    if (docDetails.JointSignerDetails != null && docDetails.JointSignerDetails.Count > 0)
                     {
-                        jointOwnerCount = docDetails.JointSignerDetails.Count;
                         for (int i = 0; i < docDetails.JointSignerDetails.Count; i++)
                         {
                             Signer jointSigner = new Signer();
+                            jointSigner.Tabs = new Tabs();
+                            jointSigner.Tabs.SignHereTabs = new List<SignHere>();
 
-                            signer.Name = docDetails.JointSignerDetails[i].ReciName;
-                            signer.Email = docDetails.JointSignerDetails[i].ReciEmail;
-                            signer.RecipientId = docDetails.JointSignerDetails[i].ReciId;
-                            signer.RoutingOrder = Convert.ToString((i + 2));
-                            //signer.IdCheckConfigurationName= "ID Check";
-                            signer.Tabs = new Tabs();
-                            signer.Tabs.SignHereTabs = new List<SignHere>();
+                            jointSigner.Name = docDetails.JointSignerDetails[i].ReciName;
+                            jointSigner.Email = docDetails.JointSignerDetails[i].ReciEmail;
+                            jointSigner.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            jointSigner.RoutingOrder = docDetails.JointSignerDetails[i].ReciId;
+
                             SignHere jointSignerTab = new SignHere();
                             jointSignerTab.DocumentId = "1";
-                            jointSignerTab.RecipientId = "1";
+                            jointSignerTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
                             jointSignerTab.AnchorString = "Joint0w$ign" + (i + 1);
                             jointSignerTab.AnchorXOffset = "0";
                             jointSignerTab.AnchorYOffset = "0";
                             jointSignerTab.AnchorUnits = "inches";
                             jointSignerTab.AnchorIgnoreIfNotPresent = "true";
+
                             jointSigner.Tabs.SignHereTabs.Add(jointSignerTab);
                             envDef.Recipients.Signers.Add(jointSigner);
                         }
@@ -141,27 +140,27 @@ namespace FillTheDoc.DAL
                         for (int i = 0; i < docDetails.CUSignerDetails.Count; i++)
                         {
                             Signer jointSigner = new Signer();
+                            jointSigner.Tabs = new Tabs();
+                            jointSigner.Tabs.SignHereTabs = new List<SignHere>();
 
-                            signer.Name = docDetails.CUSignerDetails[i].ReciName;
-                            signer.Email = docDetails.CUSignerDetails[i].ReciEmail;
-                            signer.RecipientId = docDetails.CUSignerDetails[i].ReciId;
-                            signer.RoutingOrder = Convert.ToString((i + 2+ jointOwnerCount));
-                            //signer.IdCheckConfigurationName= "ID Check";
-                            signer.Tabs = new Tabs();
-                            signer.Tabs.SignHereTabs = new List<SignHere>();
+                            jointSigner.Name =docDetails.CUSignerDetails[i].ReciName;
+                            jointSigner.Email = docDetails.CUSignerDetails[i].ReciEmail;
+                            jointSigner.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                            jointSigner.RoutingOrder = docDetails.CUSignerDetails[i].ReciId;
+                           
                             SignHere jointSignerTab = new SignHere();
                             jointSignerTab.DocumentId = "1";
-                            jointSignerTab.RecipientId = "1";
-                            jointSignerTab.AnchorString = "Joint0w$ign" + (i + 1);
+                            jointSignerTab.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                            jointSignerTab.AnchorString = "Cu0w$ign";
                             jointSignerTab.AnchorXOffset = "0";
                             jointSignerTab.AnchorYOffset = "0";
                             jointSignerTab.AnchorUnits = "inches";
                             jointSignerTab.AnchorIgnoreIfNotPresent = "true";
+
                             jointSigner.Tabs.SignHereTabs.Add(jointSignerTab);
                             envDef.Recipients.Signers.Add(jointSigner);
                         }
                     }
-
                 }
 
                 envDef.Status = "sent";
@@ -179,7 +178,7 @@ namespace FillTheDoc.DAL
                 return string.Empty;
             }
         }
-       
+
         public string RequestSignedDocument(string envelopeId)
         {
             try
@@ -237,7 +236,7 @@ namespace FillTheDoc.DAL
 
         #region Private Methods
 
-       
+
         private bool GetFromCredentialStore()
         {
             try
