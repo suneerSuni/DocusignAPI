@@ -50,7 +50,7 @@ namespace FillTheDoc.DAL
 
         #region Public Methods
 
-        public string SendforESign(SendDocumentInfo docDetails, List<SignerInfo> jointEmail, List<SignerInfo> cuEmail)
+        public string SendforESign(SendDocumentInfo docDetails)
         {
             try
             {

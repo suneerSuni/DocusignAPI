@@ -10,13 +10,15 @@ using System.Text;
 namespace DocuSignAPI
 {
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the interface name "IService1" in both code and config file together.
-    [ServiceContract]
+    [ServiceContract ]
     public interface IDocuSignService
     {
         
         [OperationContract]
-        string SendforESign(SendDocumentInfo docDetails,string placeHolderName,  List<CLDocValue> value, List<SignerInfo> jointEmail , List<SignerInfo> cuEmail);
+        string SendforESign(SendDocumentInfo docDetails, string signerInfoJSon, string tableStrXML,  List<CLDocValue> value,int jointCount, string Type);
 
+        [OperationContract]
+        string test(string data);
         // TODO: Add your service operations here
     }
 }
