@@ -22,6 +22,9 @@ namespace DocuSignAPI
 
         [OperationContract]
         string test(string data);
+
+        [OperationContract]
+        string TestSendForSign();
         // TODO: Add your service operations here
     }
 }

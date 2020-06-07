@@ -39,9 +39,9 @@ namespace FillTheDoc.Utils
 
         #region Methods
 
-       
 
-      
+
+
         public void UpdateStatus(string id, string status)
         {
             try
@@ -95,10 +95,10 @@ namespace FillTheDoc.Utils
                         data.BenDesiNameDOB = Convert.ToString(reader["BenDesiNameDOB"]);
                         data.BenDesiNameDate = Convert.ToString(reader["BenDesiNameDate"]);
                         data.BenDesiMemberNumber = Convert.ToString(reader["BenDesiMemberNumber"]);
-                       
-                        
-                       
-                        
+
+
+
+
                         data.DirectDepositVeriFullName = Convert.ToString(reader["DirectDepositVeriFullName"]);
 
                         data.DirectDepositCheckings = Convert.ToString(reader["DirectDepositCheckings"]);
@@ -167,7 +167,7 @@ namespace FillTheDoc.Utils
             }
         }
 
-        public void UpdateDocuSignSubmit(string id, string docID, string status)
+        public void UpdateDocuSignSubmit(int personId, string docID, string docName, string status = "DocuSign sent")
         {
             try
             {
@@ -177,9 +177,10 @@ namespace FillTheDoc.Utils
                     SqlCommand sql_cmnd = new SqlCommand(_updateDocuSignStatusProcName, _sqlCon);
                     sql_cmnd.CommandType = CommandType.StoredProcedure;
 
-                    sql_cmnd.Parameters.AddWithValue("@DocID", SqlDbType.VarChar).Value = docID;
-                    sql_cmnd.Parameters.AddWithValue("@Status", SqlDbType.VarChar).Value = status;
-                    sql_cmnd.Parameters.AddWithValue("@Id", SqlDbType.VarChar).Value = id;
+                    sql_cmnd.Parameters.AddWithValue("@DocuSignID", SqlDbType.VarChar).Value = docID;
+                    sql_cmnd.Parameters.AddWithValue("@DocuSignStatus", SqlDbType.VarChar).Value = status;
+                    sql_cmnd.Parameters.AddWithValue("@PersonID", SqlDbType.Int).Value = personId;
+                    sql_cmnd.Parameters.AddWithValue("@DocuName", SqlDbType.VarChar).Value = docName;
                     sql_cmnd.ExecuteNonQuery();
                     _sqlCon.Close();
 
@@ -188,13 +189,13 @@ namespace FillTheDoc.Utils
             }
             catch (Exception ex)
             {
-                Utility.LogAction("Updating status for id " + id + " failed with error " + ex.Message);
+                Utility.LogAction("Updating status for id " + personId + " failed with error " + ex.Message);
             }
         }
 
-       
 
-       
+
+
 
 
         #endregion

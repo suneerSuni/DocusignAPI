@@ -21,9 +21,6 @@ namespace DocuSignAPI
     {
         public string FillDocument(int id, int jointCount = 0, string Type = "")
         {
-            //TODO: Remove below line
-            id = 3; jointCount = 1; Type = "Type1";
-
             string DocuSignID = string.Empty;
             try
             {
@@ -65,7 +62,7 @@ namespace DocuSignAPI
                 DocuSignDAL dalObj = new DocuSignDAL();
                 DBConnector connector = new DBConnector();
                 List<DocumentFields> dataList = connector.ReadDocuSignData(id);
-                var obj = BuildDocuSignDocFields(dataList);
+                var obj = BuildDocuSignDocFields(dataList, Type);
                 obj.FileBase64String = new WordReader().FillValuesToDoc(Convert.FromBase64String(base64WordDoc), "", obj);
                 return obj.FileBase64String;
             }
@@ -78,9 +75,6 @@ namespace DocuSignAPI
 
         public string SendforESign(int id, int jointCount = 0, string Type = "")
         {
-            //TODO: Remove below line
-            id = 3; jointCount = 1; Type = "Type1";
-
             string DocuSignID = string.Empty;
             try
             {
@@ -119,13 +113,13 @@ namespace DocuSignAPI
                 }
                 base64WordDoc = Convert.ToBase64String(File.ReadAllBytes(filePath));
 
-
                 DocuSignDAL dalObj = new DocuSignDAL();
                 DBConnector connector = new DBConnector();
                 List<DocumentFields> dataList = connector.ReadDocuSignData(id);
-                var obj = BuildDocuSignDocFields(dataList);
+                var obj = BuildDocuSignDocFields(dataList, Type);
                 obj.FileBase64String = new WordReader().FillValuesToDoc(Convert.FromBase64String(base64WordDoc), "", obj);
                 DocuSignID = dalObj.SendforESign(obj);
+                connector.UpdateDocuSignSubmit(id, DocuSignID, ConfigurationManager.AppSettings["DocumentName"]);
                 return DocuSignID;
             }
             catch (Exception exception)
@@ -136,7 +130,7 @@ namespace DocuSignAPI
 
         }
 
-        private SendDocumentInfo BuildDocuSignDocFields(List<DocumentFields> dataList)
+        private SendDocumentInfo BuildDocuSignDocFields(List<DocumentFields> dataList, string type)
         {
             int recepientLoop = 0;
 
@@ -166,7 +160,7 @@ namespace DocuSignAPI
                     ReciId = Convert.ToString(++recepientLoop)
                 });
                 #endregion
-
+                values.Add(new CLDocValue { Key = "date", Value = DateTime.Now.ToString("MM/dd/yyyy") });
                 values.Add(new CLDocValue { Key = "MemberFullName", Value = dataList.ElementAt(0).MemberServiceRequestFullName });
                 values.Add(new CLDocValue { Key = "MemberNo", Value = dataList.ElementAt(0).MemberServiceRequestMemberInfo });
                 values.Add(new CLDocValue { Key = "MemberName", Value = dataList.ElementAt(0).MemberServiceRequestFullName });
@@ -179,7 +173,7 @@ namespace DocuSignAPI
                 values.Add(new CLDocValue { Key = "IssuingDate", Value = dataList.ElementAt(0).MemberServiceRequestIDIssueDate });
                 values.Add(new CLDocValue { Key = "CityZip", Value = dataList.ElementAt(0).MemberServiceCityStateZip2 });
                 values.Add(new CLDocValue { Key = "IDExpDate", Value = dataList.ElementAt(0).MemberServiceIDExpDate });
-                values.Add(new CLDocValue { Key = "DOB", Value = dataList.ElementAt(0).MemberServiceDOB });
+                values.Add(new CLDocValue { Key = "DOB", Value = !string.IsNullOrEmpty(dataList.ElementAt(0).MemberServiceDOB) ? dataList.ElementAt(0).MemberServiceDOB.Split(' ').ElementAt(0) : "" });
                 values.Add(new CLDocValue { Key = "HomePhone", Value = dataList.ElementAt(0).MemberServiceHomePhone });
                 values.Add(new CLDocValue { Key = "Email", Value = dataList.ElementAt(0).MemberServiceEmail });
                 values.Add(new CLDocValue { Key = "CellPhone", Value = dataList.ElementAt(0).MemberServiceCell });
@@ -190,6 +184,7 @@ namespace DocuSignAPI
                 values.Add(new CLDocValue { Key = "NewMemberName1", Value = dataList.ElementAt(0).RetailAccountChangeMemberName });
                 values.Add(new CLDocValue { Key = "MemberNumber1", Value = dataList.ElementAt(0).RetailAccountChangeMemberNumber });
                 values.Add(new CLDocValue { Key = "SSNTIN", Value = dataList.ElementAt(0).RetailAccountChangeSSNNumber });
+                values.Add(new CLDocValue { Key = "SSN", Value = dataList.ElementAt(0).RetailAccountChangeSSNNumber });
                 values.Add(new CLDocValue { Key = "MailingAddress1", Value = dataList.ElementAt(0).RetailAccountChangeMailingAddress });
                 values.Add(new CLDocValue { Key = "CityStateZip1", Value = dataList.ElementAt(0).RetailAccountChangeCityStateZip });
                 values.Add(new CLDocValue { Key = "DriversLicIssueDate1", Value = dataList.ElementAt(0).RetailAccountChangeIssuedDate });
@@ -197,7 +192,7 @@ namespace DocuSignAPI
                 values.Add(new CLDocValue { Key = "WorkPhone1", Value = dataList.ElementAt(0).RetailAccountChangeWorkPhone });
                 values.Add(new CLDocValue { Key = "CellPhone1", Value = dataList.ElementAt(0).RetailAccountChangeCellPhone });
                 values.Add(new CLDocValue { Key = "Employer1", Value = dataList.ElementAt(0).RetailAccountChangeEmployer });
-                values.Add(new CLDocValue { Key = "DateofBirth1", Value = dataList.ElementAt(0).RetailAccountChangeDOB });
+                values.Add(new CLDocValue { Key = "DateofBirth1", Value = !string.IsNullOrEmpty(dataList.ElementAt(0).RetailAccountChangeDOB) ? dataList.ElementAt(0).RetailAccountChangeDOB.Split(' ').ElementAt(0) : "" });
                 values.Add(new CLDocValue { Key = "Occupation1", Value = dataList.ElementAt(0).RetailAccountChangeOccupation });
                 values.Add(new CLDocValue { Key = "Email1", Value = dataList.ElementAt(0).RetailAccountChangeEmail });
 
@@ -214,19 +209,27 @@ namespace DocuSignAPI
                 //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).RetailAccountChangeMoneyMarketChk });
             }
 
-            for (int loop = 1; loop <= dataList.Count; loop++)
+            for (int loop = 1; loop < dataList.Count; loop++)
             {
-                SetDocuSignFields(dataList[loop], values, jointSignerDetails, loop,  Convert.ToString(++recepientLoop));
+                SetDocuSignFields(dataList[loop], values, jointSignerDetails, loop, Convert.ToString(++recepientLoop), type);
             }
 
-            sDocInfo.CUSignerDetails = new List<SignerInfo>()
+            switch (type)
             {
+                case "Type3":
+                case "Type4":
+                    sDocInfo.CUSignerDetails = new List<SignerInfo>()
+                    {
                 new SignerInfo() {
                     ReciName =ConfigurationManager.AppSettings["ReciName"],
                     ReciEmail=ConfigurationManager.AppSettings["ReciEmail"],
                     ReciId=Convert.ToString(++recepientLoop)
-                }
-            };
+                        }
+                    };
+                    break;
+                default:
+                    break;
+            }
 
             sDocInfo.DocuSignFields = values;
             sDocInfo.SignerDetails = signerDetails;
@@ -235,7 +238,7 @@ namespace DocuSignAPI
             return sDocInfo;
         }
 
-        private void SetDocuSignFields(DocumentFields dataList, List<CLDocValue> values, List<SignerInfo> jointSignerDetails, int loop, string reciID)
+        private void SetDocuSignFields(DocumentFields dataList, List<CLDocValue> values, List<SignerInfo> jointSignerDetails, int loop, string reciID, string type)
         {
             values.Add(new CLDocValue { Key = $"MemberName{loop}", Value = dataList.MemberServiceRequestFullName });
             values.Add(new CLDocValue { Key = $"SSN{loop}", Value = dataList.RetailAccountChangeSSNNumber });
@@ -248,7 +251,8 @@ namespace DocuSignAPI
             values.Add(new CLDocValue { Key = $"IssuingDate{loop}", Value = dataList.MemberServiceRequestIDIssueDate });
             values.Add(new CLDocValue { Key = $"CityZip{loop}", Value = dataList.MemberServiceCityStateZip2 });
             values.Add(new CLDocValue { Key = $"IDExpDate{loop}", Value = dataList.MemberServiceIDExpDate });
-            values.Add(new CLDocValue { Key = $"DOB{loop}", Value = dataList.MemberServiceDOB });
+            values.Add(new CLDocValue { Key = $"NameRelationship{loop}", Value = dataList.BenDesiNameRelationShip });
+            values.Add(new CLDocValue { Key = $"DOB{loop}", Value = !string.IsNullOrEmpty(dataList.MemberServiceDOB) ? dataList.MemberServiceDOB.Split(' ').ElementAt(0) : "" });
             values.Add(new CLDocValue { Key = $"HomePhone{loop}", Value = dataList.MemberServiceHomePhone });
             values.Add(new CLDocValue { Key = $"Email{loop}", Value = dataList.MemberServiceEmail });
             values.Add(new CLDocValue { Key = $"CellPhone{loop}", Value = dataList.MemberServiceCell });
@@ -256,18 +260,18 @@ namespace DocuSignAPI
             values.Add(new CLDocValue { Key = $"Employer{loop}", Value = dataList.MemberServiceEmployer });
             values.Add(new CLDocValue { Key = $"OccupationTitlev{loop}", Value = dataList.MemberServiceOccupationTitle });
 
-            values.Add(new CLDocValue { Key = $"ChangeMemberName{loop+1}", Value = dataList.RetailAccountChangeMemberName });
-            values.Add(new CLDocValue { Key = $"ChangeSSNTIN{loop+1}", Value = dataList.RetailAccountChangeSSNNumber });
-            values.Add(new CLDocValue { Key = $"ChangeMailingAddress{loop+1}", Value = dataList.RetailAccountChangeMailingAddress });
-            values.Add(new CLDocValue { Key = $"ChangeCityStateZip{loop+1}", Value = dataList.RetailAccountChangeCityStateZip });
-            values.Add(new CLDocValue { Key = $"ChangeDriversLicIssueDate{loop+1}", Value = dataList.RetailAccountChangeIssuedDate });
-            values.Add(new CLDocValue { Key = $"ChangeHomePhone{loop+1}", Value = dataList.RetailAccountChangePhone });
-            values.Add(new CLDocValue { Key = $"ChangeWorkPhone{loop+1}", Value = dataList.RetailAccountChangeWorkPhone });
-            values.Add(new CLDocValue { Key = $"ChangeCellPhone{loop+1}", Value = dataList.RetailAccountChangeCellPhone });
-            values.Add(new CLDocValue { Key = $"ChangeEmployer{loop+1}", Value = dataList.RetailAccountChangeEmployer });
-            values.Add(new CLDocValue { Key = $"ChangeDateofBirth{loop+1}", Value = dataList.RetailAccountChangeDOB });
-            values.Add(new CLDocValue { Key = $"ChangeOccupation{loop+1}", Value = dataList.RetailAccountChangeOccupation });
-            values.Add(new CLDocValue { Key = $"ChangeEmail{loop+1}", Value = dataList.RetailAccountChangeEmail });
+            values.Add(new CLDocValue { Key = $"ChangeMemberName{loop + 1}", Value = dataList.RetailAccountChangeMemberName });
+            values.Add(new CLDocValue { Key = $"ChangeSSNTIN{loop + 1}", Value = dataList.RetailAccountChangeSSNNumber });
+            values.Add(new CLDocValue { Key = $"ChangeMailingAddress{loop + 1}", Value = dataList.RetailAccountChangeMailingAddress });
+            values.Add(new CLDocValue { Key = $"ChangeCityStateZip{loop + 1}", Value = dataList.RetailAccountChangeCityStateZip });
+            values.Add(new CLDocValue { Key = $"ChangeDriversLicIssueDate{loop + 1}", Value = dataList.RetailAccountChangeIssuedDate });
+            values.Add(new CLDocValue { Key = $"ChangeHomePhone{loop + 1}", Value = dataList.RetailAccountChangePhone });
+            values.Add(new CLDocValue { Key = $"ChangeWorkPhone{loop + 1}", Value = dataList.RetailAccountChangeWorkPhone });
+            values.Add(new CLDocValue { Key = $"ChangeCellPhone{loop + 1}", Value = dataList.RetailAccountChangeCellPhone });
+            values.Add(new CLDocValue { Key = $"ChangeEmployer{loop + 1}", Value = dataList.RetailAccountChangeEmployer });
+            values.Add(new CLDocValue { Key = $"ChangeDateofBirth{loop + 1}", Value = !string.IsNullOrEmpty(dataList.RetailAccountChangeDOB) ? dataList.RetailAccountChangeDOB.Split(' ').ElementAt(0) : "" });
+            values.Add(new CLDocValue { Key = $"ChangeOccupation{loop + 1}", Value = dataList.RetailAccountChangeOccupation });
+            values.Add(new CLDocValue { Key = $"ChangeEmail{loop + 1}", Value = dataList.RetailAccountChangeEmail });
 
             jointSignerDetails.Add(new SignerInfo()
             {
@@ -281,6 +285,11 @@ namespace DocuSignAPI
         {
             List<SignerInfo> signers = JsonConvert.DeserializeObject<List<SignerInfo>>(data);
             return data;
+        }
+
+        public string TestSendForSign()
+        {
+            return SendforESign(277, 9, "Type2");
         }
     }
 }

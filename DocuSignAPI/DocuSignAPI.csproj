@@ -159,10 +159,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="DocuSignDocs\Folder3\Type3\" />
-    <Folder Include="DocuSignDocs\Folder3\Type4\" />
-    <Folder Include="DocuSignDocs\Folder6\" />
-    <Folder Include="DocuSignDocs\Folder9\" />
     <Folder Include="Logs\" />
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +168,16 @@
     </Content>
     <Content Include="DocuSignDocs\Folder3\Type1\MSR New Membership.docx" />
     <Content Include="DocuSignDocs\Folder3\Type2\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder3\Type3\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder3\Type4\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder6\Type1\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder6\Type2\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder6\Type3\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder6\Type4\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder9\Type1\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder9\Type2\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder9\Type3\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\Folder9\Type4\MSR New Membership.docx" />
     <None Include="Properties\PublishProfiles\DocuSign.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
