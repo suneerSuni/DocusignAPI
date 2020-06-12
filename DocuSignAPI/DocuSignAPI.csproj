@@ -179,6 +179,7 @@
     <Content Include="DocuSignDocs\Folder9\Type3\MSR New Membership.docx" />
     <Content Include="DocuSignDocs\Folder9\Type4\MSR New Membership.docx" />
     <None Include="Properties\PublishProfiles\DocuSign.pubxml" />
+    <None Include="Properties\PublishProfiles\DoucuSign.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

@@ -19,51 +19,57 @@ namespace DocuSignAPI
     // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
     public class DocuSignService : IDocuSignService
     {
-        public string FillDocument(int id, int jointCount = 0, string Type = "")
+        public string FillDocument(int id,string CUName,string CUEmail )
         {
             string DocuSignID = string.Empty;
             try
             {
                 string base64WordDoc;
-
                 string filePath = string.Empty;
+                string Type = "Type1";
                 string folderPath = "Folder3";
-                if (jointCount <= 3)
-                {
-                    folderPath = "Folder3";
-                }
-                else if (jointCount <= 6)
-                {
-                    folderPath = "Folder6";
-                }
-                else if (jointCount <= 9)
-                {
-                    folderPath = "Folder9";
-                }
-                switch (Type)
-                {
-                    case "Type1":
-                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type1\\MSR New Membership.docx";
-                        break;
-                    case "Type2":
-                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type2\\MSR New Membership.docx";
-                        break;
-                    case "Type3":
-                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type3\\MSR New Membership.docx";
-                        break;
-                    case "Type4":
-                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type4\\MSR New Membership.docx";
-                        break;
-                    default:
-                        break;
-                }
-                base64WordDoc = Convert.ToBase64String(File.ReadAllBytes(filePath));
-
                 DocuSignDAL dalObj = new DocuSignDAL();
                 DBConnector connector = new DBConnector();
                 List<DocumentFields> dataList = connector.ReadDocuSignData(id);
-                var obj = BuildDocuSignDocFields(dataList, Type);
+                filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type1\\MSR New Membership.docx";
+
+                if ((dataList.Count - 1) <= 3)
+                {
+                    folderPath = "Folder3";
+                }
+                else if ((dataList.Count - 1) <= 6)
+                {
+                    folderPath = "Folder6";
+                }
+                else if ((dataList.Count - 1) <= 9)
+                {
+                    folderPath = "Folder9";
+                }
+                if (dataList.Count > 0)
+                {
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(dataList.ElementAt(0).BenDesiBeneficiary)) && dataList.ElementAt(0).MemberServiceCheckingAccChk == "True")
+                    {
+                        Type = "Type4";
+                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type4\\MSR New Membership.docx";
+                    }
+                    else
+                        if (!string.IsNullOrEmpty(Convert.ToString(dataList.ElementAt(0).BenDesiBeneficiary)))
+                    {
+                        Type = "Type2";
+                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type2\\MSR New Membership.docx";
+                    }
+                    else
+                        if (dataList.ElementAt(0).MemberServiceCheckingAccChk == "True")
+                    {
+                        Type = "Type3";
+                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type3\\MSR New Membership.docx";
+                    }
+                }
+                base64WordDoc = Convert.ToBase64String(File.ReadAllBytes(filePath));
+                var obj = BuildDocuSignDocFields(dataList, Type, CUName, CUEmail);
                 obj.FileBase64String = new WordReader().FillValuesToDoc(Convert.FromBase64String(base64WordDoc), "", obj);
+                File.WriteAllBytes(@"E:\\test1.doc", Convert.FromBase64String(obj.FileBase64String));
                 return obj.FileBase64String;
             }
             catch (Exception exception)
@@ -73,50 +79,56 @@ namespace DocuSignAPI
             }
         }
 
-        public string SendforESign(int id, int jointCount = 0, string Type = "")
+        public string SendforESign(int id, string CUName, string CUEmail)
         {
             string DocuSignID = string.Empty;
             try
             {
                 string base64WordDoc;
-
                 string filePath = string.Empty;
-                string folderPath = "Folder3";
-                if (jointCount <= 3)
-                {
-                    folderPath = "Folder3";
-                }
-                else if (jointCount <= 6)
-                {
-                    folderPath = "Folder6";
-                }
-                else if (jointCount <= 9)
-                {
-                    folderPath = "Folder9";
-                }
-                switch (Type)
-                {
-                    case "Type1":
-                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type1\\MSR New Membership.docx";
-                        break;
-                    case "Type2":
-                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type2\\MSR New Membership.docx";
-                        break;
-                    case "Type3":
-                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type3\\MSR New Membership.docx";
-                        break;
-                    case "Type4":
-                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type4\\MSR New Membership.docx";
-                        break;
-                    default:
-                        break;
-                }
-                base64WordDoc = Convert.ToBase64String(File.ReadAllBytes(filePath));
-
+                string Type = "Type1";
                 DocuSignDAL dalObj = new DocuSignDAL();
                 DBConnector connector = new DBConnector();
                 List<DocumentFields> dataList = connector.ReadDocuSignData(id);
-                var obj = BuildDocuSignDocFields(dataList, Type);
+                string folderPath = "Folder3";
+                filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type1\\MSR New Membership.docx";
+                
+                if ((dataList.Count-1) <= 3)
+                {
+                    folderPath = "Folder3";
+                }
+                else if ((dataList.Count - 1) <= 6)
+                {
+                    folderPath = "Folder6";
+                }
+                else if ((dataList.Count - 1) <= 9)
+                {
+                    folderPath = "Folder9";
+                }
+                if (dataList.Count > 0)
+                {
+                    
+                    if (!string.IsNullOrEmpty(Convert.ToString(dataList.ElementAt(0).BenDesiBeneficiary)) && dataList.ElementAt(0).MemberServiceCheckingAccChk=="True")
+                    {
+                        Type = "Type4";
+                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type4\\MSR New Membership.docx";
+                    }
+                    else
+                        if (!string.IsNullOrEmpty(Convert.ToString(dataList.ElementAt(0).BenDesiBeneficiary)))
+                    {
+                        Type = "Type2";
+                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type2\\MSR New Membership.docx";
+                    }
+                    else
+                        if (dataList.ElementAt(0).MemberServiceCheckingAccChk == "True")
+                    {
+                        Type = "Type3";
+                        filePath = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\Type3\\MSR New Membership.docx";
+                    }
+                }
+
+                base64WordDoc = Convert.ToBase64String(File.ReadAllBytes(filePath));
+                var obj = BuildDocuSignDocFields(dataList, Type, CUName, CUEmail);
                 obj.FileBase64String = new WordReader().FillValuesToDoc(Convert.FromBase64String(base64WordDoc), "", obj);
                 DocuSignID = dalObj.SendforESign(obj);
                 connector.UpdateDocuSignSubmit(id, DocuSignID, ConfigurationManager.AppSettings["DocumentName"]);
@@ -130,7 +142,7 @@ namespace DocuSignAPI
 
         }
 
-        private SendDocumentInfo BuildDocuSignDocFields(List<DocumentFields> dataList, string type)
+        private SendDocumentInfo BuildDocuSignDocFields(List<DocumentFields> dataList, string type,string CUName, string CUEmail)
         {
             int recepientLoop = 0;
 
@@ -142,7 +154,7 @@ namespace DocuSignAPI
 
             if (dataList.Count() > 0)
             {
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiBeneficiary });
+                values.Add(new CLDocValue { Key = "BENEFICIARYPOD", Value = dataList.ElementAt(0).BenDesiBeneficiary });
                 //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiMemberNumber });
                 //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameDate });
                 //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameDOB });
@@ -181,7 +193,7 @@ namespace DocuSignAPI
                 values.Add(new CLDocValue { Key = "Employer", Value = dataList.ElementAt(0).MemberServiceEmployer });
                 values.Add(new CLDocValue { Key = "OccupationTitle", Value = dataList.ElementAt(0).MemberServiceOccupationTitle });
 
-                values.Add(new CLDocValue { Key = "NewMemberName1", Value = dataList.ElementAt(0).RetailAccountChangeMemberName });
+                values.Add(new CLDocValue { Key = "NewMemberName1", Value = dataList.ElementAt(0).MemberServiceRequestFullName });
                 values.Add(new CLDocValue { Key = "MemberNumber1", Value = dataList.ElementAt(0).RetailAccountChangeMemberNumber });
                 values.Add(new CLDocValue { Key = "SSNTIN", Value = dataList.ElementAt(0).RetailAccountChangeSSNNumber });
                 values.Add(new CLDocValue { Key = "SSN", Value = dataList.ElementAt(0).RetailAccountChangeSSNNumber });
@@ -196,17 +208,22 @@ namespace DocuSignAPI
                 values.Add(new CLDocValue { Key = "Occupation1", Value = dataList.ElementAt(0).RetailAccountChangeOccupation });
                 values.Add(new CLDocValue { Key = "Email1", Value = dataList.ElementAt(0).RetailAccountChangeEmail });
 
-                values.Add(new CLDocValue { Key = "ClubSav", Value = dataList.ElementAt(0).RetailAccountChangeClubCheck });
-                values.Add(new CLDocValue { Key = "ClubSav2", Value = dataList.ElementAt(0).RetailAccountChangeClubCheck });
-                values.Add(new CLDocValue { Key = "ClubSaving", Value = dataList.ElementAt(0).MemberServiceClubCheck });
-                values.Add(new CLDocValue { Key = "club", Value = dataList.ElementAt(0).MemberServiceClubCheck });
-                values.Add(new CLDocValue { Key = "CheckingProd", Value = dataList.ElementAt(0).RetailAccountChangeCheckingAcc });
-                values.Add(new CLDocValue { Key = "CheckingProd2", Value = dataList.ElementAt(0).RetailAccountChangeCheckingAcc });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).MemberServiceCheckingAcc });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).MemberServiceCheckingAccChk });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).MemberServiceMoneyMarketChk });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).RetailAccountChangeAccChk });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).RetailAccountChangeMoneyMarketChk });
+
+                values.Add(new CLDocValue { Key = "ClubSavChk", Value = dataList.ElementAt(0).MemberServiceClubCheck });
+                values.Add(new CLDocValue { Key = "ClubSav2Chk", Value = dataList.ElementAt(0).MemberServiceClubCheck });
+
+                values.Add(new CLDocValue { Key = "CheckingProd", Value = dataList.ElementAt(0).MemberServiceCheckingAcc });
+                values.Add(new CLDocValue { Key = "CheckingProd2", Value = dataList.ElementAt(0).MemberServiceCheckingAcc });
+                values.Add(new CLDocValue { Key = "CheckingProd3", Value = dataList.ElementAt(0).MemberServiceCheckingAcc });
+
+                values.Add(new CLDocValue { Key = "Checking", Value = dataList.ElementAt(0).MemberServiceCheckingAccChk });
+                values.Add(new CLDocValue { Key = "checking", Value = dataList.ElementAt(0).MemberServiceCheckingAccChk });
+
+                values.Add(new CLDocValue { Key = "chkMoneyMarket", Value = dataList.ElementAt(0).MemberServiceMoneyMarketChk });
+                values.Add(new CLDocValue { Key = "MoneyMarket", Value = dataList.ElementAt(0).MemberServiceMoneyMarketChk });
+
+               
+               
             }
 
             for (int loop = 1; loop < dataList.Count; loop++)
@@ -214,6 +231,7 @@ namespace DocuSignAPI
                 SetDocuSignFields(dataList[loop], values, jointSignerDetails, loop, Convert.ToString(++recepientLoop), type);
             }
 
+           
             switch (type)
             {
                 case "Type3":
@@ -221,8 +239,8 @@ namespace DocuSignAPI
                     sDocInfo.CUSignerDetails = new List<SignerInfo>()
                     {
                 new SignerInfo() {
-                    ReciName =ConfigurationManager.AppSettings["ReciName"],
-                    ReciEmail=ConfigurationManager.AppSettings["ReciEmail"],
+                    ReciName =CUName,
+                    ReciEmail=CUEmail,
                     ReciId=Convert.ToString(++recepientLoop)
                         }
                     };
@@ -260,7 +278,7 @@ namespace DocuSignAPI
             values.Add(new CLDocValue { Key = $"Employer{loop}", Value = dataList.MemberServiceEmployer });
             values.Add(new CLDocValue { Key = $"OccupationTitlev{loop}", Value = dataList.MemberServiceOccupationTitle });
 
-            values.Add(new CLDocValue { Key = $"ChangeMemberName{loop + 1}", Value = dataList.RetailAccountChangeMemberName });
+            values.Add(new CLDocValue { Key = $"ChangeMemberName{loop + 1}", Value = dataList.MemberServiceRequestFullName });
             values.Add(new CLDocValue { Key = $"ChangeSSNTIN{loop + 1}", Value = dataList.RetailAccountChangeSSNNumber });
             values.Add(new CLDocValue { Key = $"ChangeMailingAddress{loop + 1}", Value = dataList.RetailAccountChangeMailingAddress });
             values.Add(new CLDocValue { Key = $"ChangeCityStateZip{loop + 1}", Value = dataList.RetailAccountChangeCityStateZip });
@@ -289,7 +307,7 @@ namespace DocuSignAPI
 
         public string TestSendForSign()
         {
-            return SendforESign(277, 9, "Type2");
+            return SendforESign(3,"CUSuneer","suneer.pa@claysys.net");
         }
     }
 }

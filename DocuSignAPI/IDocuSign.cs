@@ -15,10 +15,10 @@ namespace DocuSignAPI
     {
         
         [OperationContract]
-        string SendforESign(int id,int jointCount, string Type);
+        string SendforESign(int id, string CUName, string CUEmail);
 
         [OperationContract]
-        string FillDocument(int id, int jointCount = 0, string Type = "");
+        string FillDocument(int id, string CUName, string CUEmail);
 
         [OperationContract]
         string test(string data);
