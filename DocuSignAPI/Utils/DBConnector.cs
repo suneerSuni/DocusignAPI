@@ -89,68 +89,88 @@ namespace FillTheDoc.Utils
                     {
                         data = new DocumentFields();
 
-                        data.BenDesiBeneficiary = Convert.ToString(reader["BenDesiBeneficiary"]);
-                        data.BenDesiNameRelationShip = Convert.ToString(reader["BenDesiNameRelationShip"]);
-                        data.BenDesiNameSSNNumber = Convert.ToString(reader["BenDesiNameSSNNumber"]);
-                        data.BenDesiNameDOB = Convert.ToString(reader["BenDesiNameDOB"]);
-                        data.BenDesiNameDate = Convert.ToString(reader["BenDesiNameDate"]);
-                        data.BenDesiMemberNumber = Convert.ToString(reader["BenDesiMemberNumber"]);
+                        data.BenDesiBeneficiary = Convert.ToString(Value(reader, "BenDesiBeneficiary", "")); 
+                        data.BenDesiNameRelationShip = Convert.ToString(Value(reader, "BenDesiNameRelationShip", ""));
+                        data.BenDesiNameSSNNumber = Convert.ToString(Value(reader, "BenDesiNameSSNNumber", "")); 
+                        data.BenDesiNameDOB = Convert.ToString(Value(reader, "BenDesiNameDOB", "")); 
+                        data.BenDesiNameDate = Convert.ToString(Value(reader, "BenDesiNameDate", "")); 
+                        data.BenDesiMemberNumber = Convert.ToString(Value(reader, "BenDesiMemberNumber", ""));
 
 
 
 
-                        data.DirectDepositVeriFullName = Convert.ToString(reader["DirectDepositVeriFullName"]);
+                        data.DirectDepositVeriFullName = Convert.ToString(Value(reader, "DirectDepositVeriFullName", ""));
 
-                        data.DirectDepositCheckings = Convert.ToString(reader["DirectDepositCheckings"]);
-                        data.DirectDepositSavings = Convert.ToString(reader["DirectDepositSavings"]);
-                        data.MemberServiceRequestMemberInfo = Convert.ToString(reader["MemberServiceRequestMemberInfo"]);
-                        data.MemberServiceRequestFullName = Convert.ToString(reader["MemberServiceRequestFullName"]);
-                        data.MemberServiceRequestMailingAddress = Convert.ToString(reader["MemberServiceRequestMailingAddress"]);
-                        data.MemberServiceRequestIDType = Convert.ToString(reader["MemberServiceRequestIDType"]);
-                        data.MemberServiceCityStateZip1 = Convert.ToString(reader["MemberServiceCityStateZip1"]);
-                        data.MemberServiceIDNumber = Convert.ToString(reader["MemberServiceIDNumber"]);
-
-
-                        data.MemberServiceRequestPhysicalAddress = Convert.ToString(reader["MemberServiceRequestPhysicalAddress"]);
-                        data.MemberServiceRequestIDIssueState = Convert.ToString(reader["MemberServiceRequestIDIssueState"]);
-                        data.MemberServiceRequestIDIssueDate = Convert.ToString(reader["MemberServiceRequestIDIssueDate"]);
-                        data.MemberServiceCityStateZip2 = Convert.ToString(reader["MemberServiceCityStateZip2"]);
-                        data.MemberServiceIDExpDate = Convert.ToString(reader["MemberServiceIDExpDate"]);
-                        data.MemberServiceDOB = Convert.ToString(reader["MemberServiceDOB"]);
-                        data.MemberServiceHomePhone = Convert.ToString(reader["MemberServiceHomePhone"]);
-
-                        data.MemberServiceEmail = Convert.ToString(reader["MemberServiceEmail"]);
-                        data.MemberServiceCell = Convert.ToString(reader["MemberServiceCell"]);
-                        data.MemberServiceWorkPhone = Convert.ToString(reader["MemberServiceWorkPhone"]);
-                        data.MemberServiceEmployer = Convert.ToString(reader["MemberServiceEmployer"]);
-                        data.MemberServiceOccupationTitle = Convert.ToString(reader["MemberServiceOccupationTitle"]);
-                        data.MemberServiceClubCheck = Convert.ToString(reader["MemberServiceClubCheck"]);
-                        data.MemberServiceCheckingAcc = Convert.ToString(reader["MemberServiceCheckingAcc"]);
+                        data.DirectDepositCheckings = Convert.ToString(Value(reader, "DirectDepositCheckings", ""));
+                        data.DirectDepositSavings = Convert.ToString(Value(reader, "DirectDepositSavings", "")); 
+                        data.MemberServiceRequestMemberInfo = Convert.ToString(Value(reader, "MemberServiceRequestMemberInfo", "")); 
+                        data.MemberServiceRequestFullName = Convert.ToString(Value(reader, "MemberServiceRequestFullName", "")); 
+                        data.MemberServiceRequestMailingAddress = Convert.ToString(Value(reader, "MemberServiceRequestMailingAddress", "")); 
+                        data.MemberServiceRequestIDType = Convert.ToString(Value(reader, "MemberServiceRequestIDType", ""));
+                        data.MemberServiceCityStateZip1 = Convert.ToString(Value(reader, "MemberServiceCityStateZip1", ""));
+                        data.MemberServiceIDNumber = Convert.ToString(Value(reader, "MemberServiceIDNumber", "")); 
 
 
-                        data.MemberServiceCheckingAccChk = Convert.ToString(reader["MemberServiceCheckingAccChk"]);
-                        data.MemberServiceMoneyMarketChk = Convert.ToString(reader["MemberServiceMoneyMarketChk"]);
-                        data.RetailAccountChangeMemberName = Convert.ToString(reader["RetailAccountChangeMemberName"]);
-                        data.RetailAccountChangeMemberNumber = Convert.ToString(reader["RetailAccountChangeMemberNumber"]);
-                        data.RetailAccountChangeSSNNumber = Convert.ToString(reader["RetailAccountChangeSSNNumber"]);
-                        data.RetailAccountChangeMailingAddress = Convert.ToString(reader["RetailAccountChangeMailingAddress"]);
-                        data.RetailAccountChangeCityStateZip = Convert.ToString(reader["RetailAccountChangeCityStateZip"]);
+                        data.MemberServiceRequestPhysicalAddress = Convert.ToString(Value(reader, "MemberServiceRequestPhysicalAddress", ""));
+                        data.MemberServiceRequestIDIssueState = Convert.ToString(Value(reader, "MemberServiceRequestIDIssueState", "")); 
+                        data.MemberServiceRequestIDIssueDate = Convert.ToString(Value(reader, "MemberServiceRequestIDIssueDate", ""));
+                        data.MemberServiceCityStateZip2 = Convert.ToString(Value(reader, "MemberServiceCityStateZip2", ""));
+                        data.MemberServiceIDExpDate =  Convert.ToString(Value(reader, "MemberServiceIDExpDate", "")); 
+                        data.MemberServiceDOB = Convert.ToString(Value(reader, "MemberServiceDOB", "")); 
+                        data.MemberServiceHomePhone = Convert.ToString(Value(reader, "MemberServiceHomePhone", "")); 
+
+                        data.MemberServiceEmail = Convert.ToString(Value(reader, "MemberServiceEmail", "")); 
+                        data.MemberServiceCell = Convert.ToString(Value(reader, "MemberServiceCell", "")); 
+                        data.MemberServiceWorkPhone = Convert.ToString(Value(reader, "MemberServiceWorkPhone", ""));
+                        data.MemberServiceFaxMachine = Convert.ToString(Value(reader, "MemberServiceFaxMachine", ""));
+                        data.MemberServiceEmployer = Convert.ToString(Value(reader, "MemberServiceEmployer", "")); 
+                        data.MemberServiceOccupationTitle = Convert.ToString(Value(reader, "MemberServiceOccupationTitle", "")); 
+                        data.MemberServiceClubCheck = Convert.ToString(Value(reader, "MemberServiceClubCheck", ""));
+                        data.MemberServiceCheckingAcc = Convert.ToString(Value(reader, "MemberServiceCheckingAcc", ""));
 
 
-                        data.RetailAccountChangeIssuedDate = Convert.ToString(reader["RetailAccountChangeIssuedDate"]);
-                        data.RetailAccountChangePhone = Convert.ToString(reader["RetailAccountChangePhone"]);
-                        data.RetailAccountChangeWorkPhone = Convert.ToString(reader["RetailAccountChangeWorkPhone"]);
-                        data.RetailAccountChangeCellPhone = Convert.ToString(reader["RetailAccountChangeCellPhone"]);
-                        data.RetailAccountChangeEmployer = Convert.ToString(reader["RetailAccountChangeEmployer"]);
+                        data.MemberServiceCheckingAccChk = Convert.ToString(Value(reader, "MemberServiceCheckingAccChk", "")); 
+                        data.MemberServiceMoneyMarketChk = Convert.ToString(Value(reader, "MemberServiceMoneyMarketChk", "")); 
+                        data.RetailAccountChangeMemberName = Convert.ToString(Value(reader, "RetailAccountChangeMemberName", "")); 
+                        data.RetailAccountChangeMemberNumber = Convert.ToString(Value(reader, "RetailAccountChangeMemberNumber", "")); 
+                        data.RetailAccountChangeSSNNumber = Convert.ToString(Value(reader, "RetailAccountChangeSSNNumber", ""));
+                        data.RetailAccountChangeMailingAddress = Convert.ToString(Value(reader, "RetailAccountChangeMailingAddress", ""));
+                        data.RetailAccountChangeCityStateZip = Convert.ToString(Value(reader, "RetailAccountChangeCityStateZip", "")); 
 
-                        data.RetailAccountChangeDOB = Convert.ToString(reader["RetailAccountChangeDOB"]);
-                        data.RetailAccountChangeOccupation = Convert.ToString(reader["RetailAccountChangeOccupation"]);
-                        data.RetailAccountChangeEmail = Convert.ToString(reader["RetailAccountChangeEmail"]);
+                        data.RetailAccountChangeIDNumber= Convert.ToString(Value(reader, "RetailAccountChangeIDNumber", "")); 
+                        data.RetailAccountChangeIssuedDate =Convert.ToString(Value(reader, "RetailAccountChangeIssuedDate", "")); 
+                        data.RetailAccountChangeExpDate =  Convert.ToString(Value(reader, "RetailAccountChangeExpDate", "")); 
+                        data.RetailAccountChangePhone = Convert.ToString(Value(reader, "RetailAccountChangePhone", ""));
+                        data.RetailAccountChangeWorkPhone = Convert.ToString(Value(reader, "RetailAccountChangeWorkPhone", "")); 
+                        data.RetailAccountChangeCellPhone = Convert.ToString(Value(reader, "RetailAccountChangeCellPhone", ""));
+                        data.RetailAccountChangeEmployer = Convert.ToString(Value(reader, "RetailAccountChangeEmployer", "")); 
 
-                        data.RetailAccountChangeClubCheck = Convert.ToString(reader["RetailAccountChangeClubCheck"]);
-                        data.RetailAccountChangeCheckingAcc = Convert.ToString(reader["RetailAccountChangeCheckingAcc"]);
-                        data.RetailAccountChangeAccChk = Convert.ToString(reader["RetailAccountChangeAccChk"]);
-                        data.RetailAccountChangeMoneyMarketChk = Convert.ToString(reader["RetailAccountChangeMoneyMarketChk"]);
+                        data.RetailAccountChangeDOB =Convert.ToString(Value(reader, "RetailAccountChangeDOB", "")); 
+                        data.RetailAccountChangeOccupation = Convert.ToString(Value(reader, "RetailAccountChangeOccupation", ""));
+                        data.RetailAccountChangeEmail = Convert.ToString(Value(reader, "RetailAccountChangeEmail", "")); 
+
+                        data.RetailAccountChangeClubCheck = Convert.ToString(Value(reader, "RetailAccountChangeClubCheck", "")); 
+                        data.RetailAccountChangeCheckingAcc = Convert.ToString(Value(reader, "RetailAccountChangeCheckingAcc", "")); 
+                        data.RetailAccountChangeAccChk = Convert.ToString(Value(reader, "RetailAccountChangeAccChk", ""));
+                        data.RetailAccountChangeMoneyMarketChk = Convert.ToString(Value(reader, "RetailAccountChangeMoneyMarketChk", ""));
+
+                        data.SavingProducts = Convert.ToString(Value(reader, "SavingProducts", "")); 
+                        data.CheckingProducts = Convert.ToString(Value(reader, "CheckingProducts", ""));
+                        data.CertificateProducts = Convert.ToString(Value(reader, "CertificateProducts", ""));
+                        data.CertificateAccountNumbers = Convert.ToString(Value(reader, "CertificateAccountNumbers", ""));
+                        data.COTSCount = Convert.ToString(Value(reader, "COTSCount", ""));
+                        data.COTSAccountNumbers = Convert.ToString(Value(reader, "COTSAccountNumbers", ""));
+                        data.OverDraftAccounts = Convert.ToString(Value(reader, "OverdraftAccounts", ""));
+
+                        data.MemberCity = Convert.ToString(Value(reader, "MemberCity", ""));
+                        data.MemberState = Convert.ToString(Value(reader, "MemberState", ""));
+                        data.MemberZip = Convert.ToString(Value(reader, "MemberZip", ""));
+                        data.CreditScore = Convert.ToString(Value(reader, "CreditScore", ""));
+                        data.ScoreDetails = Convert.ToString(Value(reader,"ScoreDetails",""));
+
+                        data.ExistingOrNewMember = Convert.ToString(Value(reader, "ExistingOrNewMember", ""));
+                        //data.IsInPersonSigner = Convert.ToString(Value(reader, "IsInPersonSigner", ""));
+
 
                         dataList.Add(data);
 
@@ -166,7 +186,27 @@ namespace FillTheDoc.Utils
                 return new List<DocumentFields>();
             }
         }
+        internal static T Value<T>(IDataRecord reader, string fldName, T defaultVal)
+        {
+            object o;
 
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i).Equals(fldName, StringComparison.OrdinalIgnoreCase))
+                {
+                    o = reader[i];
+                    if (o != null && o != DBNull.Value)
+                    {
+
+                        return (T)Convert.ChangeType(o, typeof(T));
+                    }
+                    else
+                        return defaultVal;
+
+                }
+            }
+            return defaultVal;
+        }
         public void UpdateDocuSignSubmit(int personId, string docID, string docName, string status = "DocuSign sent")
         {
             try

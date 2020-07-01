@@ -11,7 +11,7 @@ namespace FillTheDoc.Model
     [DataContract]
     public class SendDocumentInfo
     {
-        
+
         [DataMember]
         public string File_Sign { get; set; }
         [DataMember]
@@ -25,7 +25,7 @@ namespace FillTheDoc.Model
 
         public List<CLDocValue> DocuSignFields { get; set; }
 
-        public string FileBase64String { get; set; }
+        public List<string> FileBase64String { get; set; }
 
     }
     [DataContract]
@@ -37,6 +37,8 @@ namespace FillTheDoc.Model
         public string ReciEmail { get; set; }
         [DataMember]
         public string ReciId { get; set; }
+        [DataMember]
+        public string IsInPerson { get; set; }
         // public List<SignatureDetails> SignaturePosition { get; set; }
     }
 
@@ -52,7 +54,7 @@ namespace FillTheDoc.Model
         public string SignaturePage { get; set; }
     }
 
-                   
+
     public class DocumentFields
     {
         private string _benDesiBeneficiary;
@@ -83,7 +85,7 @@ namespace FillTheDoc.Model
         public string BenDesiNameDOB
         {
             get { return _benDesiNameDOB ?? string.Empty; }
-            set { _benDesiNameDOB = value; }
+            set { _benDesiNameDOB = ToDateCase(value); }
 
         }
 
@@ -91,7 +93,7 @@ namespace FillTheDoc.Model
         public string BenDesiNameDate
         {
             get { return _benDesiNameDate ?? string.Empty; }
-            set { _benDesiNameDate = value; }
+            set { _benDesiNameDate = ToDateCase(value); }
 
         }
 
@@ -120,7 +122,7 @@ namespace FillTheDoc.Model
             set { _benDesiMemberNumber = value; }
 
         }
-     
+
 
         private string _directDepositSavings;
         public string DirectDepositSavings
@@ -209,7 +211,7 @@ namespace FillTheDoc.Model
         public string MemberServiceRequestIDIssueDate
         {
             get { return _memberServiceRequestIDIssueDate ?? string.Empty; }
-            set { _memberServiceRequestIDIssueDate = value; }
+            set { _memberServiceRequestIDIssueDate = ToDateCase(value); }
 
         }
 
@@ -225,7 +227,7 @@ namespace FillTheDoc.Model
         public string MemberServiceIDExpDate
         {
             get { return _MemberServiceIDExpDate ?? string.Empty; }
-            set { _MemberServiceIDExpDate = value; }
+            set { _MemberServiceIDExpDate = ToDateCase(value); }
 
         }
 
@@ -233,7 +235,7 @@ namespace FillTheDoc.Model
         public string MemberServiceDOB
         {
             get { return _MemberServiceDOB ?? string.Empty; }
-            set { _MemberServiceDOB = value; }
+            set { _MemberServiceDOB = ToDateCase(value); }
 
         }
 
@@ -362,11 +364,25 @@ namespace FillTheDoc.Model
         }
 
 
+        private string _RetailAccountChangeIDNumber;
+        public string RetailAccountChangeIDNumber
+        {
+            get { return _RetailAccountChangeIDNumber ?? string.Empty; }
+            set { _RetailAccountChangeIDNumber = value; }
+
+        }
         private string _RetailAccountChangeIssuedDate;
         public string RetailAccountChangeIssuedDate
         {
             get { return _RetailAccountChangeIssuedDate ?? string.Empty; }
-            set { _RetailAccountChangeIssuedDate = value; }
+            set { _RetailAccountChangeIssuedDate = ToDateCase(value); }
+
+        }
+        private string _RetailAccountChangeExpDate;
+        public string RetailAccountChangeExpDate
+        {
+            get { return _RetailAccountChangeExpDate ?? string.Empty; }
+            set { _RetailAccountChangeExpDate = ToDateCase(value); }
 
         }
 
@@ -410,7 +426,7 @@ namespace FillTheDoc.Model
         public string RetailAccountChangeDOB
         {
             get { return _RetailAccountChangeDOB ?? string.Empty; }
-            set { _RetailAccountChangeDOB = value; }
+            set { _RetailAccountChangeDOB = ToDateCase(value); }
 
         }
 
@@ -464,11 +480,127 @@ namespace FillTheDoc.Model
             set { _RetailAccountChangeMoneyMarketChk = value; }
 
         }
-        
+        private string _cotsCount;
+        public string COTSCount
+        {
+            get { return _cotsCount ?? string.Empty; }
+            set { _cotsCount = value; }
+
+        }
+        private string _savingProducts;
+        public string SavingProducts
+        {
+            get { return _savingProducts ?? string.Empty; }
+            set { _savingProducts = value; }
+
+        }
+        private string _checkingProducts;
+        public string CheckingProducts
+        {
+            get { return _checkingProducts ?? string.Empty; }
+            set { _checkingProducts = value; }
+
+        }
+        private string _certificateProducts;
+        public string CertificateProducts
+        {
+            get { return _certificateProducts ?? string.Empty; }
+            set { _certificateProducts = value; }
+
+        }
+        private string _cotsAccountNumbers;
+        public string COTSAccountNumbers
+        {
+            get { return _cotsAccountNumbers ?? string.Empty; }
+            set { _cotsAccountNumbers = value; }
+
+        }
+        private string _overDraftAccounts;
+        public string OverDraftAccounts
+        {
+            get { return _overDraftAccounts ?? string.Empty; }
+            set { _overDraftAccounts = value; }
+
+        }
+        private string _memberCity;
+        public string MemberCity
+        {
+            get { return _memberCity ?? string.Empty; }
+            set { _memberCity = value; }
+
+        }
+        private string _memberState;
+        public string MemberState
+        {
+            get { return _memberState ?? string.Empty; }
+            set { _memberState = value; }
+
+        }
+        private string _memberZip;
+        public string MemberZip
+        {
+            get { return _memberZip ?? string.Empty; }
+            set { _memberZip = value; }
+
+        }
+        private string _creditScore;
+        public string CreditScore
+        {
+            get { return _creditScore ?? string.Empty; }
+            set { _creditScore = value; }
+
+        }
+        private string _certificateAccountNumbers;
+        public string CertificateAccountNumbers
+        {
+            get { return _certificateAccountNumbers ?? string.Empty; }
+            set { _certificateAccountNumbers = value; }
+
+        }
+        private string _scoreDetails;
+        public string ScoreDetails
+        {
+            get { return _scoreDetails ?? string.Empty; }
+            set { _scoreDetails = value; }
+
+        }
+        private string _memberServiceFaxMachine;
+        public string MemberServiceFaxMachine
+        {
+            get { return _memberServiceFaxMachine ?? string.Empty; }
+            set { _memberServiceFaxMachine = value; }
+
+        }
+
+        private string _existingOrNewMember;
+        public string ExistingOrNewMember
+        {
+            get { return _existingOrNewMember ?? string.Empty; }
+            set { _existingOrNewMember = value; }
+
+        }
+        private string _isInPersonSigner;
+        public string IsInPersonSigner
+        {
+            get { return _isInPersonSigner ?? string.Empty; }
+            set { _isInPersonSigner = value; }
+
+        }
+
+        public string ToDateCase(string d)
+        {
+            string result = string.Empty;
+            if (!string.IsNullOrEmpty(d))
+            {
+                result = d.Split(' ')[0];
+            }
+            return result;
+        }
 
 
     }
 
-    
+
+
 
 }

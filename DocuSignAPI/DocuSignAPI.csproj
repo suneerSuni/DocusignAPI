@@ -146,8 +146,10 @@
   <ItemGroup>
     <Compile Include="DAL\DocuSignDAL.cs" />
     <Compile Include="DAL\WordReader.cs" />
+    <Compile Include="Model\Base64WordDocs.cs" />
     <Compile Include="Model\CLDocValue.cs" />
     <Compile Include="Model\CLTableValue.cs" />
+    <Compile Include="Model\SVCResults.cs" />
     <Compile Include="Model\SendDocumentInfo.cs" />
     <Compile Include="DocuSign.svc.cs">
       <DependentUpon>DocuSign.svc</DependentUpon>
@@ -166,18 +168,21 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="DocuSignDocs\Folder3\Type1\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder3\Type2\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder3\Type3\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder3\Type4\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder6\Type1\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder6\Type2\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder6\Type3\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder6\Type4\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder9\Type1\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder9\Type2\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder9\Type3\MSR New Membership.docx" />
-    <Content Include="DocuSignDocs\Folder9\Type4\MSR New Membership.docx" />
+    <Content Include="DocuSignDocs\BeneficiaryDesignation.docx" />
+    <Content Include="DocuSignDocs\DirectDepositAccountVerification.docx" />
+    <Content Include="DocuSignDocs\Folder3\MemberServiceRequest.docx" />
+    <Content Include="DocuSignDocs\Folder6\MemberServiceRequest.docx" />
+    <Content Include="DocuSignDocs\Folder9\MemberServiceRequest.docx" />
+    <Content Include="DocuSignDocs\Folder3\AccountReceipt.docx" />
+    <Content Include="DocuSignDocs\AdverseAction.docx" />
+    <Content Include="DocuSignDocs\AltraFoundationApplication.docx" />
+    <Content Include="DocuSignDocs\IndexedMoneyMarketDisclosure.docx" />
+    <Content Include="DocuSignDocs\Folder6\AccountReceipt.docx" />
+    <Content Include="DocuSignDocs\Folder9\AccountReceipt.docx" />
+    <Content Include="DocuSignDocs\Folder3\RetailAccountChangeForm.docx" />
+    <Content Include="DocuSignDocs\Folder6\RetailAccountChangeForm.docx" />
+    <Content Include="DocuSignDocs\Folder9\RetailAccountChangeForm.docx" />
+    <Content Include="DocuSignDocs\OverdraftServicesConsentForm.docx" />
     <None Include="Properties\PublishProfiles\DocuSign.pubxml" />
     <None Include="Properties\PublishProfiles\DoucuSign.pubxml" />
     <None Include="Web.Debug.config">

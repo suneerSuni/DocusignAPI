@@ -15,3 +15,40 @@ Parameter name: index
 6/7/2020 4:25:10 PM:49 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
 6/7/2020 4:26:41 PM:974 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
 6/7/2020 9:06:16 PM:129 -@: Updating status for id 277 failed with error ExecuteNonQuery: CommandText property has not been initialized
+6/13/2020 6:55:28 PM:284 -@: Open XML action failed:Object reference not set to an instance of an object.
+6/13/2020 6:55:28 PM:329 -@: Open XML action failed:Object reference not set to an instance of an object.
+6/13/2020 6:55:28 PM:380 -@: Open XML action failed:Object reference not set to an instance of an object.
+6/13/2020 7:00:53 PM:843 -@: sending document to DocuSign failed with exception: Error calling CreateEnvelope: {"errorCode":"NO_DOCUMENT_RECEIVED","message":"The document element did not contain the encoded document, or there is a problem with the encoding. Bytes for document corresponding to documentId 3 not found in request. 'documentId=<x>' possibly missing from Content-Disposition header."}
+6/13/2020 7:38:51 PM:492 -@: Open XML action failed:Object reference not set to an instance of an object.
+6/14/2020 1:35:44 PM:811 -@: Exception The process cannot access the file 'C:\Users\midhun.k\Source\Repos\DocusignAPI\DocuSignAPI\DocuSignDocs\BeneficiaryDesignation.docx' because it is being used by another process.
+6/14/2020 4:52:47 PM:392 -@: Exception The process cannot access the file 'C:\Users\midhun.k\Source\Repos\DocusignAPI\DocuSignAPI\DocuSignDocs\Folder3\MemberServiceRequest.docx' because it is being used by another process.
+6/14/2020 8:42:08 PM:966 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/15/2020 1:31:19 PM:947 -@: Exception The process cannot access the file 'C:\Users\midhun.k\Source\Repos\DocusignAPI\DocuSignAPI\DocuSignDocs\OverdraftServicesConsentForm.docx' because it is being used by another process.
+6/16/2020 10:24:01 PM:358 -@: Exception Value cannot be null.
+Parameter name: s
+6/17/2020 8:46:15 PM:256 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/17/2020 9:16:39 PM:338 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/18/2020 12:57:09 PM:991 -@: Exception Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+6/18/2020 12:59:12 PM:315 -@: Exception The process cannot access the file 'C:\Users\midhun.k\Source\Repos\DocusignAPI\DocuSignAPI\DocuSignDocs\Folder3\RetailAccountChangeForm.docx' because it is being used by another process.
+6/18/2020 10:15:54 PM:665 -@: Exception The process cannot access the file 'E:\ZZZ\RetailAccountChangeForm.docx' because it is being used by another process.
+6/19/2020 9:18:24 PM:839 -@: Exception Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+6/19/2020 9:19:46 PM:273 -@: Exception Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+6/19/2020 9:21:08 PM:638 -@: Exception The process cannot access the file 'E:\ZZZ\MemberServiceRequest.docx' because it is being used by another process.
+6/19/2020 9:31:27 PM:594 -@: Exception Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+6/23/2020 12:05:11 PM:819 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/23/2020 12:05:38 PM:266 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/23/2020 12:06:11 PM:184 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/23/2020 12:06:23 PM:684 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/23/2020 12:07:24 PM:583 -@: Exception Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+6/23/2020 12:54:14 PM:609 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/23/2020 12:54:25 PM:438 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/23/2020 1:08:55 PM:762 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/23/2020 1:09:04 PM:280 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/23/2020 1:10:44 PM:145 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/23/2020 1:40:49 PM:235 -@: sending document to DocuSign failed with exception: Object reference not set to an instance of an object.
+6/29/2020 8:23:46 PM:330 -@: Exception The process cannot access the file 'C:\Users\midhun.k\Source\Repos\DocusignAPI\DocuSignAPI\DocuSignDocs\Folder3\MemberServiceRequest.docx' because it is being used by another process.

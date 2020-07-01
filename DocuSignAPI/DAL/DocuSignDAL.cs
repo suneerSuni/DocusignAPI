@@ -3,6 +3,7 @@ using DocuSign.eSign.Api;
 using DocuSign.eSign.Client;
 using DocuSign.eSign.Model;
 using DocuSign.Utils;
+using DocuSignAPI.Model;
 using FillTheDoc.Model;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ namespace FillTheDoc.DAL
 
         #region Public Methods
 
-        public string SendforESign(SendDocumentInfo docDetails)
+        public string SendforESign(SendDocumentInfo docDetails, List<FileDetail> fileDetails)
         {
             try
             {
@@ -71,14 +72,17 @@ namespace FillTheDoc.DAL
                 envDef.EmailBlurb = ConfigurationManager.AppSettings["DocuSignEmailBody"];
                 if (Utility.IsEventLogged) Utility.LogAction("Creating document object");
 
-                Document doc = new Document();
-                doc.DocumentBase64 = docDetails.FileBase64String;
-                doc.Name = ConfigurationManager.AppSettings["DocumentName"];
-                doc.DocumentId = "1";
-                doc.FileExtension = "docx";
-
                 envDef.Documents = new List<Document>();
-                envDef.Documents.Add(doc);
+
+                for (int i = 0; i < fileDetails.Count(); i++)
+                {
+                    Document doc = new Document();
+                    doc.DocumentBase64 = fileDetails.ElementAt(i).base64WordDoc;
+                    doc.Name = fileDetails.ElementAt(i).name;
+                    doc.DocumentId = fileDetails.ElementAt(i).id;
+                    doc.FileExtension = "docx";
+                    envDef.Documents.Add(doc);
+                }
 
                 envDef.Recipients = new Recipients();
                 envDef.Recipients.Signers = new List<Signer>();
@@ -91,6 +95,9 @@ namespace FillTheDoc.DAL
                     signer.Tabs = new Tabs();
                     signer.Tabs.SignHereTabs = new List<SignHere>();
                     signer.Tabs.DateSignedTabs = new List<DateSigned>();
+                    signer.Tabs.TextTabs = new List<Text>();
+                    signer.Tabs.DateTabs = new List<Date>();
+                    signer.Tabs.CheckboxTabs = new List<Checkbox>();
 
                     signer.Name = reci.ReciName;
                     signer.Email = reci.ReciEmail;
@@ -119,6 +126,79 @@ namespace FillTheDoc.DAL
 
                     signer.Tabs.DateSignedTabs.Add(signed);
 
+                    for (int j = 1; j <= 16; j++)
+                    {
+                        Text textTab = new Text();
+                        textTab.DocumentId = "1";
+                        textTab.RecipientId = "1";
+                        textTab.AnchorString = "member1$1nput" + j;
+                        textTab.TabLabel = "OptionalBeneficiaryInfo" + j;
+                        textTab.AnchorXOffset = "0";
+                        textTab.AnchorYOffset = "-3";
+                        textTab.AnchorUnits = "pixels";
+                        textTab.AnchorIgnoreIfNotPresent = "true";
+                        textTab.AnchorMatchWholeWord = "true";
+                        textTab.Required = "false";
+                        textTab.Width = "75";
+                        textTab.Height = "15";
+                        textTab.FontSize = "Size10";
+                        textTab.Font = "TimesNewRoman";
+                        signer.Tabs.TextTabs.Add(textTab);
+                    }
+
+
+                    for (int k = 1; k <= 8; k++)
+                    {
+                        Date dateTab = new Date();
+                        dateTab.DocumentId = "1";
+                        dateTab.RecipientId = "1";
+                        dateTab.AnchorString = "OBI$D01B$" + k;
+                        dateTab.TabLabel = "OBIDate" + k;
+                        dateTab.AnchorXOffset = "0";
+                        dateTab.AnchorYOffset = "-3";
+                        dateTab.AnchorUnits = "pixels";
+                        dateTab.AnchorIgnoreIfNotPresent = "true";
+                        dateTab.AnchorMatchWholeWord = "true";
+                        dateTab.Required = "false";
+                        dateTab.Width = "50";
+                        dateTab.Height = "15";
+                        dateTab.FontSize = "Size9";
+                        dateTab.Font = "Arial";
+                        signer.Tabs.DateTabs.Add(dateTab);
+                    }
+
+                    //Text textTab1 = new Text();
+                    //textTab1.DocumentId = "1";
+                    //textTab1.RecipientId = "1";
+                    //textTab1.AnchorString = "DollarAmount1$1nput";
+                    //textTab1.TabLabel = "DollarAmountAllocatedToAltra";
+                    //textTab1.AnchorXOffset = "0";
+                    //textTab1.AnchorYOffset = "-3";
+                    //textTab1.AnchorUnits = "pixels";
+                    //textTab1.AnchorIgnoreIfNotPresent = "true";
+                    //textTab1.AnchorMatchWholeWord = "true";
+                    //textTab1.Required = "false";
+                    //textTab1.Width = "75";
+                    //textTab1.Height = "15";
+                    //textTab1.FontSize = "Size10";
+                    //textTab1.Font = "TimesNewRoman";
+                    //signer.Tabs.TextTabs.Add(textTab1);
+
+                    for (int c = 1; c <= 5; c++)
+                    {
+                        Checkbox checkBox = new Checkbox();
+                        checkBox.DocumentId = "1";
+                        checkBox.RecipientId = "1";
+                        checkBox.AnchorString = "cu0$chk" + c;
+                        checkBox.TabLabel = "MSRCheckBox" + c;
+                        checkBox.AnchorXOffset = "0";
+                        checkBox.AnchorYOffset = "0";
+                        checkBox.AnchorUnits = "inches";
+                        checkBox.AnchorIgnoreIfNotPresent = "true";
+
+                        signer.Tabs.CheckboxTabs.Add(checkBox);
+                    }
+
                     envDef.Recipients.Signers.Add(signer);
                 }
 
@@ -130,11 +210,25 @@ namespace FillTheDoc.DAL
                         jointSigner.Tabs = new Tabs();
                         jointSigner.Tabs.SignHereTabs = new List<SignHere>();
                         jointSigner.Tabs.DateSignedTabs = new List<DateSigned>();
+                        jointSigner.Tabs.TextTabs = new List<Text>();
+                        jointSigner.Tabs.DateTabs = new List<Date>();
+                        jointSigner.Tabs.CheckboxTabs = new List<Checkbox>();
 
                         jointSigner.Name = docDetails.JointSignerDetails[i].ReciName;
                         jointSigner.Email = docDetails.JointSignerDetails[i].ReciEmail;
                         jointSigner.RecipientId = docDetails.JointSignerDetails[i].ReciId;
                         jointSigner.RoutingOrder = docDetails.JointSignerDetails[i].ReciId;
+
+                        //jointSigner.DocumentVisibility = new List<DocumentVisibility>();
+                        //for (int d = 0; d < envDef.Documents.Count(); d++)
+                        //{
+                        //    Document docu = envDef.Documents[d];
+                        //    DocumentVisibility dvObj = new DocumentVisibility();
+                        //    dvObj.DocumentId = docu.DocumentId;
+                        //    dvObj.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                        //    dvObj.Visible = d == 0 ? "true" : "false";
+                        //    jointSigner.DocumentVisibility.Add(dvObj);
+                        //}
 
                         SignHere jointSignerTab = new SignHere();
                         jointSignerTab.DocumentId = "1";
@@ -157,6 +251,55 @@ namespace FillTheDoc.DAL
                         jointSigned.AnchorIgnoreIfNotPresent = "true";
 
                         jointSigner.Tabs.DateSignedTabs.Add(jointSigned);
+
+                        Text textTab = new Text();
+                        textTab.DocumentId = "1";
+                        textTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                        textTab.AnchorString = "joint1$1nput";
+                        textTab.AnchorXOffset = "0";
+                        textTab.AnchorYOffset = "-3";
+                        textTab.AnchorUnits = "pixels";
+                        textTab.AnchorIgnoreIfNotPresent = "true";
+                        textTab.AnchorMatchWholeWord = "true";
+                        textTab.Required = "false";
+                        textTab.Width = "75";
+                        textTab.Height = "15";
+                        textTab.FontSize = "Size10";
+                        textTab.Font = "TimesNewRoman";
+                        jointSigner.Tabs.TextTabs.Add(textTab);
+
+                        Date dateTab = new Date();
+                        dateTab.DocumentId = "1";
+                        dateTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                        dateTab.AnchorString = "joint$D01B$";
+                        dateTab.TabLabel = "date1";
+                        dateTab.AnchorXOffset = "0";
+                        dateTab.AnchorYOffset = "-3";
+                        dateTab.AnchorUnits = "pixels";
+                        dateTab.AnchorIgnoreIfNotPresent = "true";
+                        dateTab.AnchorMatchWholeWord = "true";
+                        dateTab.Required = "false";
+                        dateTab.Width = "50";
+                        dateTab.Height = "15";
+                        dateTab.FontSize = "Size9";
+                        dateTab.Font = "Arial";
+                        jointSigner.Tabs.DateTabs.Add(dateTab);
+
+                        for (int c = 1; c <= 5; c++)
+                        {
+                            Checkbox checkBox = new Checkbox();
+                            checkBox.DocumentId = "1";
+                            checkBox.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            checkBox.AnchorString = "cu0$chk" + c;
+                            checkBox.TabLabel = "MSRCheckBox" + c;
+                            checkBox.AnchorXOffset = "0";
+                            checkBox.AnchorYOffset = "0";
+                            checkBox.AnchorUnits = "inches";
+                            checkBox.AnchorIgnoreIfNotPresent = "true";
+
+                            jointSigner.Tabs.CheckboxTabs.Add(checkBox);
+                        }
+
                         envDef.Recipients.Signers.Add(jointSigner);
                     }
                 }
@@ -166,26 +309,30 @@ namespace FillTheDoc.DAL
                 {
                     for (int i = 0; i < docDetails.CUSignerDetails.Count; i++)
                     {
-                        Signer jointSigner = new Signer();
-                        jointSigner.Tabs = new Tabs();
-                        jointSigner.Tabs.SignHereTabs = new List<SignHere>();
-                        jointSigner.Tabs.DateSignedTabs = new List<DateSigned>();
+                        Signer cuSigner = new Signer();
+                        cuSigner.Tabs = new Tabs();
+                        cuSigner.Tabs.SignHereTabs = new List<SignHere>();
+                        cuSigner.Tabs.DateSignedTabs = new List<DateSigned>();
+                        cuSigner.Tabs.TextTabs = new List<Text>();
+                        cuSigner.Tabs.DateTabs = new List<Date>();
+                        cuSigner.Tabs.CheckboxTabs = new List<Checkbox>();
 
-                        jointSigner.Name = docDetails.CUSignerDetails[i].ReciName;
-                        jointSigner.Email = docDetails.CUSignerDetails[i].ReciEmail;
-                        jointSigner.RecipientId = docDetails.CUSignerDetails[i].ReciId;
-                        jointSigner.RoutingOrder = docDetails.CUSignerDetails[i].ReciId;
+                        cuSigner.Name = docDetails.CUSignerDetails[i].ReciName;
+                        cuSigner.Email = docDetails.CUSignerDetails[i].ReciEmail;
+                        cuSigner.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                        cuSigner.RoutingOrder = docDetails.CUSignerDetails[i].ReciId;
 
-                        SignHere jointSignerTab = new SignHere();
-                        jointSignerTab.DocumentId = "1";
-                        jointSignerTab.RecipientId = docDetails.CUSignerDetails[i].ReciId;
-                        jointSignerTab.AnchorString = "Cu0w$ign";
-                        jointSignerTab.AnchorXOffset = "0";
-                        jointSignerTab.AnchorYOffset = "0";
-                        jointSignerTab.AnchorUnits = "inches";
-                        jointSignerTab.AnchorIgnoreIfNotPresent = "true";
 
-                        jointSigner.Tabs.SignHereTabs.Add(jointSignerTab);
+                        SignHere cuSignerTab = new SignHere();
+                        cuSignerTab.DocumentId = "1";
+                        cuSignerTab.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                        cuSignerTab.AnchorString = "Cu0w$ign";
+                        cuSignerTab.AnchorXOffset = "0";
+                        cuSignerTab.AnchorYOffset = "0";
+                        cuSignerTab.AnchorUnits = "inches";
+                        cuSignerTab.AnchorIgnoreIfNotPresent = "true";
+
+                        cuSigner.Tabs.SignHereTabs.Add(cuSignerTab);
 
                         DateSigned cuSigned = new DateSigned();
                         cuSigned.DocumentId = "1";
@@ -196,13 +343,86 @@ namespace FillTheDoc.DAL
                         cuSigned.AnchorUnits = "inches";
                         cuSigned.AnchorIgnoreIfNotPresent = "true";
 
-                        jointSigner.Tabs.DateSignedTabs.Add(cuSigned);
-                        envDef.Recipients.Signers.Add(jointSigner);
+                        cuSigner.Tabs.DateSignedTabs.Add(cuSigned);
+                        for (int j = 1; j <= 6; j++)
+                        {
+                            Text textTab = new Text();
+                            textTab.DocumentId = "1";
+                            textTab.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                            textTab.AnchorString = "cu1$1nput" + j;
+                            textTab.TabLabel = "cuOfficialSec" + j;
+                            textTab.AnchorXOffset = "0";
+                            textTab.AnchorYOffset = "-3";
+                            textTab.AnchorUnits = "pixels";
+                            textTab.AnchorIgnoreIfNotPresent = "true";
+                            textTab.AnchorMatchWholeWord = "true";
+                            textTab.Required = "false";
+                            textTab.Width = "75";
+                            textTab.Height = "15";
+                            textTab.FontSize = "Size10";
+                            textTab.Font = "TimesNewRoman";
+                            cuSigner.Tabs.TextTabs.Add(textTab);
+                        }
+
+                        for (int k = 1; k <= 3; k++)
+                        {
+                            Date dateTab = new Date();
+                            dateTab.DocumentId = "1";
+                            dateTab.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                            dateTab.AnchorString = "cu$D01B$" + k;
+                            dateTab.TabLabel = "cuDate" + k;
+                            dateTab.AnchorXOffset = "0";
+                            dateTab.AnchorYOffset = "-3";
+                            dateTab.AnchorUnits = "pixels";
+                            dateTab.AnchorIgnoreIfNotPresent = "true";
+                            dateTab.AnchorMatchWholeWord = "true";
+                            dateTab.Required = "false";
+                            dateTab.Width = "50";
+                            dateTab.Height = "15";
+                            dateTab.FontSize = "Size9";
+                            dateTab.Font = "Arial";
+                            cuSigner.Tabs.DateTabs.Add(dateTab);
+                        }
+
+                        Text textTab1 = new Text();
+                        textTab1.DocumentId = "1";
+                        textTab1.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                        textTab1.AnchorString = "DollarAmount1$1nput";
+                        textTab1.TabLabel = "DollarAmountAllocatedToAltra";
+                        textTab1.AnchorXOffset = "0";
+                        textTab1.AnchorYOffset = "-3";
+                        textTab1.AnchorUnits = "pixels";
+                        textTab1.AnchorIgnoreIfNotPresent = "true";
+                        textTab1.AnchorMatchWholeWord = "true";
+                        textTab1.Required = "false";
+                        textTab1.Width = "75";
+                        textTab1.Height = "15";
+                        textTab1.FontSize = "Size10";
+                        textTab1.Font = "TimesNewRoman";
+                        cuSigner.Tabs.TextTabs.Add(textTab1);
+
+                        for (int c = 1; c <= 5; c++)
+                        {
+                            Checkbox checkBox = new Checkbox();
+                            checkBox.DocumentId = "1";
+                            checkBox.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                            checkBox.AnchorString = "cu0$chk" + c;
+                            checkBox.TabLabel = "MSRCheckBox" + c;
+                            checkBox.AnchorXOffset = "0";
+                            checkBox.AnchorYOffset = "0";
+                            checkBox.AnchorUnits = "inches";
+                            checkBox.AnchorIgnoreIfNotPresent = "true";
+
+                            cuSigner.Tabs.CheckboxTabs.Add(checkBox);
+                        }
+
+                        envDef.Recipients.Signers.Add(cuSigner);
                     }
 
                 }
 
                 envDef.Status = "sent";
+                envDef.EnforceSignerVisibility = "true";
 
                 if (Utility.IsEventLogged) Utility.LogAction("Sending Create and send envelope request");
 
@@ -214,7 +434,7 @@ namespace FillTheDoc.DAL
             catch (Exception ex)
             {
                 Utility.LogAction("sending document to DocuSign failed with exception: " + ex.Message);
-                return string.Empty;
+                throw;
             }
         }
 

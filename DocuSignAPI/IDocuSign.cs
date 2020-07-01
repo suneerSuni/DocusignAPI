@@ -1,4 +1,5 @@
-﻿using FillTheDoc.Model;
+﻿using DocuSignAPI.Model;
+using FillTheDoc.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,16 +16,18 @@ namespace DocuSignAPI
     {
         
         [OperationContract]
-        string SendforESign(int id, string CUName, string CUEmail);
+        SVCResults SendforESign(int id, string CUName, string CUEmail);
 
         [OperationContract]
-        string FillDocument(int id, string CUName, string CUEmail);
+        SVCResults FillDocument(int id, string CUName, string CUEmail,string DocuName,int dCount,string accountNo);
 
         [OperationContract]
         string test(string data);
 
         [OperationContract]
-        string TestSendForSign();
+        SVCResults TestSendForSign(int id);
+        [OperationContract]
+        SVCResults TestFillDocument(string docName);
         // TODO: Add your service operations here
     }
 }
