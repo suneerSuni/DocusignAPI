@@ -207,7 +207,7 @@ namespace FillTheDoc.Utils
             }
             return defaultVal;
         }
-        public void UpdateDocuSignSubmit(int personId, string docID, string docName, string status = "DocuSign sent")
+        public void UpdateDocuSignSubmit(int personId, string docID, string docName,string documentID, string status = "DocuSign sent")
         {
             try
             {
@@ -221,6 +221,7 @@ namespace FillTheDoc.Utils
                     sql_cmnd.Parameters.AddWithValue("@DocuSignStatus", SqlDbType.VarChar).Value = status;
                     sql_cmnd.Parameters.AddWithValue("@PersonID", SqlDbType.Int).Value = personId;
                     sql_cmnd.Parameters.AddWithValue("@DocuName", SqlDbType.VarChar).Value = docName;
+                    sql_cmnd.Parameters.AddWithValue("@DocumentID", SqlDbType.VarChar).Value = documentID;
                     sql_cmnd.ExecuteNonQuery();
                     _sqlCon.Close();
 

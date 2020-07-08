@@ -387,8 +387,8 @@ namespace FillTheDoc.DAL
                         Text textTab1 = new Text();
                         textTab1.DocumentId = "1";
                         textTab1.RecipientId = docDetails.CUSignerDetails[i].ReciId;
-                        textTab1.AnchorString = "DollarAmount1$1nput";
-                        textTab1.TabLabel = "DollarAmountAllocatedToAltra";
+                        textTab1.AnchorString = "benComment$1nput";
+                        textTab1.TabLabel = "BenComment";
                         textTab1.AnchorXOffset = "0";
                         textTab1.AnchorYOffset = "-3";
                         textTab1.AnchorUnits = "pixels";

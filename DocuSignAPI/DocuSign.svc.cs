@@ -268,6 +268,7 @@ namespace DocuSignAPI
                 if (!string.IsNullOrEmpty(InvalidFileName))
                     results.ErrorMessage += InvalidFileName;
                 Utility.LogAction("SSNID: " + id + "; Exception: " + exception.Message);
+                Utility.LogAction("StackTrace: " + exception.StackTrace);
             }
             return results;
         }
@@ -286,7 +287,7 @@ namespace DocuSignAPI
                 string folderPath = "Folder3";
                 if (dataList.Count() > 0)
                 {
-                    
+
                     if ((dataList.Count - 1) <= 3)
                     {
                         folderPath = "Folder3";
@@ -345,24 +346,35 @@ namespace DocuSignAPI
                     if (ODCFiles != null)
                         b64Docs.fileDetails.AddRange(ODCFiles);                 //Append ODC Form files with other Documents to send for DocuSign
 
+                    
                     if (dataList.ElementAt(0).ExistingOrNewMember == "New")
                     {
                         docuSignIDTROJoint = dalObj.SendforESign(obj, b64Docs.fileDetails.Where(f => f.id == "1").ToList());
-                        connector.UpdateDocuSignSubmit(id, docuSignIDTROJoint, ConfigurationManager.AppSettings["DocumentName1"]);
+                        if (!string.IsNullOrEmpty(docuSignIDTROJoint))
+                            connector.UpdateDocuSignSubmit(id, docuSignIDTROJoint, "MemberServiceRequest.pdf", "1");
                     }
 
                     if (b64Docs.fileDetails.Count() > 1)
                     {
                         var obj2 = obj;
                         obj2.JointSignerDetails = new List<SignerInfo>();
-
                         docuSignIDTRO = dalObj.SendforESign(obj2, b64Docs.fileDetails.Where(f => f.id != "1").ToList());
-                        connector.UpdateDocuSignSubmit(id, docuSignIDTRO, ConfigurationManager.AppSettings["DocumentName"]);
+                        if (!string.IsNullOrEmpty(docuSignIDTRO))
+                        {
+                            for (int i = 1; i < b64Docs.fileDetails.Count(); i++)
+                            {
+                                connector.UpdateDocuSignSubmit(id, docuSignIDTRO, b64Docs.fileDetails.ElementAt(i).name.Replace(".docx",".pdf"),
+                                    b64Docs.fileDetails.ElementAt(i).id);
+                            }
+                        }
                     }
-                    
+
 
                     results.status = "Success";
-                    results.DocuSignID = docuSignIDTROJoint + "$" + docuSignIDTRO;
+                    if (!string.IsNullOrEmpty(docuSignIDTROJoint) || !string.IsNullOrEmpty(docuSignIDTRO))
+                        results.DocuSignID = docuSignIDTROJoint + "$" + docuSignIDTRO;
+                    else
+                        results.DocuSignID = "";
                     results.ErrorMessage = "";
                     results.InnerException = "";
                     results.FilledDocument = "";
@@ -371,7 +383,7 @@ namespace DocuSignAPI
                 else
                 {
                     results.status = "Error";
-                    results.DocuSignID = docuSignIDTROJoint + "$" + docuSignIDTRO;
+                    results.DocuSignID = "";
                     results.ErrorMessage = "No data found.";
                     results.InnerException = "";
                     results.FilledDocument = "";
@@ -381,14 +393,15 @@ namespace DocuSignAPI
             catch (Exception exception)
             {
                 DBConnector connector = new DBConnector();
-                connector.UpdateDocuSignSubmit(id, "", "", "Error");
+                connector.UpdateDocuSignSubmit(id, "", "", "", "Error");
                 results.StackTrace = exception.StackTrace;
                 results.status = "Error";
                 results.DocuSignID = "";
                 results.ErrorMessage = exception.Message;
                 results.InnerException = Convert.ToString(exception.InnerException);
                 results.FilledDocument = "";
-                Utility.LogAction("SSNID: "+id+"; Exception: " + exception.Message);
+                Utility.LogAction("SSNID: " + id + "; Exception: " + exception.Message);
+                Utility.LogAction("StackTrace: " + exception.StackTrace);
             }
             return results;
 
@@ -865,7 +878,7 @@ namespace DocuSignAPI
             {
                 FileDetail file = new FileDetail();
                 file.path = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\OverdraftServicesConsentForm.docx";
-                file.name = "OverdraftServicesConsentForm.docx";
+                file.name = $"OverdraftServicesConsentForm{i+1}.docx";
                 file.id = addedDocDount + "";
 
                 int recepientLoop = 0;
