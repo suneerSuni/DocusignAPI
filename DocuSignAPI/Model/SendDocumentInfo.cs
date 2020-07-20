@@ -61,7 +61,7 @@ namespace FillTheDoc.Model
         public string BenDesiBeneficiary
         {
             get { return _benDesiBeneficiary ?? string.Empty; }
-            set { _benDesiBeneficiary = value; }
+            set { _benDesiBeneficiary =  value?.Replace("\r\n",",").Replace("\n", ",").Replace("\t", ","); }
 
         }
 

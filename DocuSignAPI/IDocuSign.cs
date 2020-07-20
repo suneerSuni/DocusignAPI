@@ -24,10 +24,10 @@ namespace DocuSignAPI
         [OperationContract]
         string test(string data);
 
-        [OperationContract]
-        SVCResults TestSendForSign(int id);
-        [OperationContract]
-        SVCResults TestFillDocument(string docName);
+        //[OperationContract]
+        //SVCResults TestSendForSign(int id);
+        //[OperationContract]
+        //SVCResults TestFillDocument(string docName);
         // TODO: Add your service operations here
     }
 }

@@ -51,7 +51,7 @@ namespace FillTheDoc.DAL
 
         #region Public Methods
 
-        public string SendforESign(SendDocumentInfo docDetails, List<FileDetail> fileDetails)
+        public string SendforESign(SendDocumentInfo docDetails, List<FileDetail> fileDetails,string CUName,string CUEmail)
         {
             try
             {
@@ -86,210 +86,104 @@ namespace FillTheDoc.DAL
 
                 envDef.Recipients = new Recipients();
                 envDef.Recipients.Signers = new List<Signer>();
+                envDef.Recipients.InPersonSigners = new List<InPersonSigner>();
 
                 if (Utility.IsEventLogged) Utility.LogAction("Creating recipient and sign tabs");
 
                 foreach (var reci in docDetails.SignerDetails)
                 {
-                    Signer signer = new Signer();
-                    signer.Tabs = new Tabs();
-                    signer.Tabs.SignHereTabs = new List<SignHere>();
-                    signer.Tabs.DateSignedTabs = new List<DateSigned>();
-                    signer.Tabs.TextTabs = new List<Text>();
-                    signer.Tabs.DateTabs = new List<Date>();
-                    signer.Tabs.CheckboxTabs = new List<Checkbox>();
-
-                    signer.Name = reci.ReciName;
-                    signer.Email = reci.ReciEmail;
-                    signer.RecipientId = reci.ReciId;
-                    signer.RoutingOrder = reci.ReciId;
-
-                    SignHere signHere = new SignHere();
-                    signHere.DocumentId = "1";
-                    signHere.RecipientId = reci.ReciId;
-                    signHere.AnchorString = "member$ign";
-                    signHere.AnchorXOffset = "0";
-                    signHere.AnchorYOffset = "0";
-                    signHere.AnchorUnits = "inches";
-                    signHere.AnchorIgnoreIfNotPresent = "false";
-
-                    signer.Tabs.SignHereTabs.Add(signHere);
-
-                    DateSigned signed = new DateSigned();
-                    signed.DocumentId = "1";
-                    signed.RecipientId = reci.ReciId;
-                    signed.AnchorString = "member$date";
-                    signed.AnchorXOffset = "0";
-                    signed.AnchorYOffset = "0";
-                    signed.AnchorUnits = "inches";
-                    signed.AnchorIgnoreIfNotPresent = "true";
-
-                    signer.Tabs.DateSignedTabs.Add(signed);
-
-                    for (int j = 1; j <= 16; j++)
+                    if (docDetails.SignerDetails.ElementAt(0).IsInPerson.ToLower() == "true")
                     {
-                        Text textTab = new Text();
-                        textTab.DocumentId = "1";
-                        textTab.RecipientId = "1";
-                        textTab.AnchorString = "member1$1nput" + j;
-                        textTab.TabLabel = "OptionalBeneficiaryInfo" + j;
-                        textTab.AnchorXOffset = "0";
-                        textTab.AnchorYOffset = "-3";
-                        textTab.AnchorUnits = "pixels";
-                        textTab.AnchorIgnoreIfNotPresent = "true";
-                        textTab.AnchorMatchWholeWord = "true";
-                        textTab.Required = "false";
-                        textTab.Width = "75";
-                        textTab.Height = "15";
-                        textTab.FontSize = "Size10";
-                        textTab.Font = "TimesNewRoman";
-                        signer.Tabs.TextTabs.Add(textTab);
-                    }
+                        InPersonSigner signer = new InPersonSigner();
+                        signer.Tabs = new Tabs();
+                        signer.Tabs.SignHereTabs = new List<SignHere>();
+                        signer.Tabs.DateSignedTabs = new List<DateSigned>();
+                        signer.Tabs.TextTabs = new List<Text>();
+                        signer.Tabs.DateTabs = new List<Date>();
+                        signer.Tabs.CheckboxTabs = new List<Checkbox>();
+
+                        //signer.Name = reci.ReciName;
+                        //signer.Email = reci.ReciEmail;
+                        //signer.RecipientId = reci.ReciId;
+                        //signer.RoutingOrder = reci.ReciId;
+
+                        signer.RecipientId = reci.ReciId;
+                        signer.RoutingOrder = reci.ReciId;
+                        signer.InPersonSigningType = "inPersonSigner";
+                        signer.SignerName = reci.ReciName;
+                        signer.HostName = CUName;
+                        signer.HostEmail = CUEmail;
+                        //signer.AutoNavigation = "true";
+                        //signer.DefaultRecipient = "true";
+
+                        SignHere signHere = new SignHere();
+                        signHere.DocumentId = "1";
+                        signHere.RecipientId = reci.ReciId;
+                        signHere.AnchorString = "member$ign";
+                        signHere.AnchorXOffset = "0";
+                        signHere.AnchorYOffset = "0";
+                        signHere.AnchorUnits = "inches";
+                        signHere.AnchorIgnoreIfNotPresent = "false";
+
+                        signer.Tabs.SignHereTabs.Add(signHere);
+
+                        DateSigned signed = new DateSigned();
+                        signed.DocumentId = "1";
+                        signed.RecipientId = reci.ReciId;
+                        signed.AnchorString = "member$date";
+                        signed.AnchorXOffset = "0";
+                        signed.AnchorYOffset = "0";
+                        signed.AnchorUnits = "inches";
+                        signed.AnchorIgnoreIfNotPresent = "true";
+
+                        signer.Tabs.DateSignedTabs.Add(signed);
+
+                        for (int j = 1; j <= 16; j++)
+                        {
+                            Text textTab = new Text();
+                            textTab.DocumentId = "1";
+                            textTab.RecipientId = "1";
+                            textTab.AnchorString = "member1$1nput" + j;
+                            textTab.TabLabel = "OptionalBeneficiaryInfo" + j;
+                            textTab.AnchorXOffset = "0";
+                            textTab.AnchorYOffset = "-3";
+                            textTab.AnchorUnits = "pixels";
+                            textTab.AnchorIgnoreIfNotPresent = "true";
+                            textTab.AnchorMatchWholeWord = "true";
+                            textTab.Required = "false";
+                            textTab.Width = "75";
+                            textTab.Height = "15";
+                            textTab.FontSize = "Size10";
+                            textTab.Font = "TimesNewRoman";
+                            signer.Tabs.TextTabs.Add(textTab);
+                        }
 
 
-                    for (int k = 1; k <= 8; k++)
-                    {
-                        Date dateTab = new Date();
-                        dateTab.DocumentId = "1";
-                        dateTab.RecipientId = "1";
-                        dateTab.AnchorString = "OBI$D01B$" + k;
-                        dateTab.TabLabel = "OBIDate" + k;
-                        dateTab.AnchorXOffset = "0";
-                        dateTab.AnchorYOffset = "-3";
-                        dateTab.AnchorUnits = "pixels";
-                        dateTab.AnchorIgnoreIfNotPresent = "true";
-                        dateTab.AnchorMatchWholeWord = "true";
-                        dateTab.Required = "false";
-                        dateTab.Width = "50";
-                        dateTab.Height = "15";
-                        dateTab.FontSize = "Size9";
-                        dateTab.Font = "Arial";
-                        signer.Tabs.DateTabs.Add(dateTab);
-                    }
-
-                    //Text textTab1 = new Text();
-                    //textTab1.DocumentId = "1";
-                    //textTab1.RecipientId = "1";
-                    //textTab1.AnchorString = "DollarAmount1$1nput";
-                    //textTab1.TabLabel = "DollarAmountAllocatedToAltra";
-                    //textTab1.AnchorXOffset = "0";
-                    //textTab1.AnchorYOffset = "-3";
-                    //textTab1.AnchorUnits = "pixels";
-                    //textTab1.AnchorIgnoreIfNotPresent = "true";
-                    //textTab1.AnchorMatchWholeWord = "true";
-                    //textTab1.Required = "false";
-                    //textTab1.Width = "75";
-                    //textTab1.Height = "15";
-                    //textTab1.FontSize = "Size10";
-                    //textTab1.Font = "TimesNewRoman";
-                    //signer.Tabs.TextTabs.Add(textTab1);
-
-                    for (int c = 1; c <= 5; c++)
-                    {
-                        Checkbox checkBox = new Checkbox();
-                        checkBox.DocumentId = "1";
-                        checkBox.RecipientId = "1";
-                        checkBox.AnchorString = "cu0$chk" + c;
-                        checkBox.TabLabel = "MSRCheckBox" + c;
-                        checkBox.AnchorXOffset = "0";
-                        checkBox.AnchorYOffset = "0";
-                        checkBox.AnchorUnits = "inches";
-                        checkBox.AnchorIgnoreIfNotPresent = "true";
-
-                        signer.Tabs.CheckboxTabs.Add(checkBox);
-                    }
-
-                    envDef.Recipients.Signers.Add(signer);
-                }
-
-                if (docDetails.JointSignerDetails != null && docDetails.JointSignerDetails.Count > 0)
-                {
-                    for (int i = 0; i < docDetails.JointSignerDetails.Count; i++)
-                    {
-                        Signer jointSigner = new Signer();
-                        jointSigner.Tabs = new Tabs();
-                        jointSigner.Tabs.SignHereTabs = new List<SignHere>();
-                        jointSigner.Tabs.DateSignedTabs = new List<DateSigned>();
-                        jointSigner.Tabs.TextTabs = new List<Text>();
-                        jointSigner.Tabs.DateTabs = new List<Date>();
-                        jointSigner.Tabs.CheckboxTabs = new List<Checkbox>();
-
-                        jointSigner.Name = docDetails.JointSignerDetails[i].ReciName;
-                        jointSigner.Email = docDetails.JointSignerDetails[i].ReciEmail;
-                        jointSigner.RecipientId = docDetails.JointSignerDetails[i].ReciId;
-                        jointSigner.RoutingOrder = docDetails.JointSignerDetails[i].ReciId;
-
-                        //jointSigner.DocumentVisibility = new List<DocumentVisibility>();
-                        //for (int d = 0; d < envDef.Documents.Count(); d++)
-                        //{
-                        //    Document docu = envDef.Documents[d];
-                        //    DocumentVisibility dvObj = new DocumentVisibility();
-                        //    dvObj.DocumentId = docu.DocumentId;
-                        //    dvObj.RecipientId = docDetails.JointSignerDetails[i].ReciId;
-                        //    dvObj.Visible = d == 0 ? "true" : "false";
-                        //    jointSigner.DocumentVisibility.Add(dvObj);
-                        //}
-
-                        SignHere jointSignerTab = new SignHere();
-                        jointSignerTab.DocumentId = "1";
-                        jointSignerTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
-                        jointSignerTab.AnchorString = "Joint0w$ign" + (i + 1);
-                        jointSignerTab.AnchorXOffset = "0";
-                        jointSignerTab.AnchorYOffset = "0";
-                        jointSignerTab.AnchorUnits = "inches";
-                        jointSignerTab.AnchorIgnoreIfNotPresent = "true";
-
-                        jointSigner.Tabs.SignHereTabs.Add(jointSignerTab);
-
-                        DateSigned jointSigned = new DateSigned();
-                        jointSigned.DocumentId = "1";
-                        jointSigned.RecipientId = docDetails.JointSignerDetails[i].ReciId;
-                        jointSigned.AnchorString = "Joint0w$date" + (i + 1);
-                        jointSigned.AnchorXOffset = "0";
-                        jointSigned.AnchorYOffset = "0";
-                        jointSigned.AnchorUnits = "inches";
-                        jointSigned.AnchorIgnoreIfNotPresent = "true";
-
-                        jointSigner.Tabs.DateSignedTabs.Add(jointSigned);
-
-                        Text textTab = new Text();
-                        textTab.DocumentId = "1";
-                        textTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
-                        textTab.AnchorString = "joint1$1nput";
-                        textTab.AnchorXOffset = "0";
-                        textTab.AnchorYOffset = "-3";
-                        textTab.AnchorUnits = "pixels";
-                        textTab.AnchorIgnoreIfNotPresent = "true";
-                        textTab.AnchorMatchWholeWord = "true";
-                        textTab.Required = "false";
-                        textTab.Width = "75";
-                        textTab.Height = "15";
-                        textTab.FontSize = "Size10";
-                        textTab.Font = "TimesNewRoman";
-                        jointSigner.Tabs.TextTabs.Add(textTab);
-
-                        Date dateTab = new Date();
-                        dateTab.DocumentId = "1";
-                        dateTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
-                        dateTab.AnchorString = "joint$D01B$";
-                        dateTab.TabLabel = "date1";
-                        dateTab.AnchorXOffset = "0";
-                        dateTab.AnchorYOffset = "-3";
-                        dateTab.AnchorUnits = "pixels";
-                        dateTab.AnchorIgnoreIfNotPresent = "true";
-                        dateTab.AnchorMatchWholeWord = "true";
-                        dateTab.Required = "false";
-                        dateTab.Width = "50";
-                        dateTab.Height = "15";
-                        dateTab.FontSize = "Size9";
-                        dateTab.Font = "Arial";
-                        jointSigner.Tabs.DateTabs.Add(dateTab);
+                        for (int k = 1; k <= 8; k++)
+                        {
+                            Date dateTab = new Date();
+                            dateTab.DocumentId = "1";
+                            dateTab.RecipientId = "1";
+                            dateTab.AnchorString = "OBI$D01B$" + k;
+                            dateTab.TabLabel = "OBIDate" + k;
+                            dateTab.AnchorXOffset = "0";
+                            dateTab.AnchorYOffset = "-3";
+                            dateTab.AnchorUnits = "pixels";
+                            dateTab.AnchorIgnoreIfNotPresent = "true";
+                            dateTab.AnchorMatchWholeWord = "true";
+                            dateTab.Required = "false";
+                            dateTab.Width = "50";
+                            dateTab.Height = "15";
+                            dateTab.FontSize = "Size9";
+                            dateTab.Font = "Arial";
+                            signer.Tabs.DateTabs.Add(dateTab);
+                        }
 
                         for (int c = 1; c <= 5; c++)
                         {
                             Checkbox checkBox = new Checkbox();
                             checkBox.DocumentId = "1";
-                            checkBox.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            checkBox.RecipientId = "1";
                             checkBox.AnchorString = "cu0$chk" + c;
                             checkBox.TabLabel = "MSRCheckBox" + c;
                             checkBox.AnchorXOffset = "0";
@@ -297,10 +191,296 @@ namespace FillTheDoc.DAL
                             checkBox.AnchorUnits = "inches";
                             checkBox.AnchorIgnoreIfNotPresent = "true";
 
-                            jointSigner.Tabs.CheckboxTabs.Add(checkBox);
+                            signer.Tabs.CheckboxTabs.Add(checkBox);
                         }
 
-                        envDef.Recipients.Signers.Add(jointSigner);
+                        envDef.Recipients.InPersonSigners.Add(signer);
+                    }
+                    else
+                    {
+
+                        Signer signer = new Signer();
+                        signer.Tabs = new Tabs();
+                        signer.Tabs.SignHereTabs = new List<SignHere>();
+                        signer.Tabs.DateSignedTabs = new List<DateSigned>();
+                        signer.Tabs.TextTabs = new List<Text>();
+                        signer.Tabs.DateTabs = new List<Date>();
+                        signer.Tabs.CheckboxTabs = new List<Checkbox>();
+
+                        signer.Name = reci.ReciName;
+                        signer.Email = reci.ReciEmail;
+                        signer.RecipientId = reci.ReciId;
+                        signer.RoutingOrder = reci.ReciId;
+
+                        SignHere signHere = new SignHere();
+                        signHere.DocumentId = "1";
+                        signHere.RecipientId = reci.ReciId;
+                        signHere.AnchorString = "member$ign";
+                        signHere.AnchorXOffset = "0";
+                        signHere.AnchorYOffset = "0";
+                        signHere.AnchorUnits = "inches";
+                        signHere.AnchorIgnoreIfNotPresent = "false";
+
+                        signer.Tabs.SignHereTabs.Add(signHere);
+
+                        DateSigned signed = new DateSigned();
+                        signed.DocumentId = "1";
+                        signed.RecipientId = reci.ReciId;
+                        signed.AnchorString = "member$date";
+                        signed.AnchorXOffset = "0";
+                        signed.AnchorYOffset = "0";
+                        signed.AnchorUnits = "inches";
+                        signed.AnchorIgnoreIfNotPresent = "true";
+
+                        signer.Tabs.DateSignedTabs.Add(signed);
+
+                        for (int j = 1; j <= 16; j++)
+                        {
+                            Text textTab = new Text();
+                            textTab.DocumentId = "1";
+                            textTab.RecipientId = "1";
+                            textTab.AnchorString = "member1$1nput" + j;
+                            textTab.TabLabel = "OptionalBeneficiaryInfo" + j;
+                            textTab.AnchorXOffset = "0";
+                            textTab.AnchorYOffset = "-3";
+                            textTab.AnchorUnits = "pixels";
+                            textTab.AnchorIgnoreIfNotPresent = "true";
+                            textTab.AnchorMatchWholeWord = "true";
+                            textTab.Required = "false";
+                            textTab.Width = "75";
+                            textTab.Height = "15";
+                            textTab.FontSize = "Size10";
+                            textTab.Font = "TimesNewRoman";
+                            signer.Tabs.TextTabs.Add(textTab);
+                        }
+
+
+                        for (int k = 1; k <= 8; k++)
+                        {
+                            Date dateTab = new Date();
+                            dateTab.DocumentId = "1";
+                            dateTab.RecipientId = "1";
+                            dateTab.AnchorString = "OBI$D01B$" + k;
+                            dateTab.TabLabel = "OBIDate" + k;
+                            dateTab.AnchorXOffset = "0";
+                            dateTab.AnchorYOffset = "-3";
+                            dateTab.AnchorUnits = "pixels";
+                            dateTab.AnchorIgnoreIfNotPresent = "true";
+                            dateTab.AnchorMatchWholeWord = "true";
+                            dateTab.Required = "false";
+                            dateTab.Width = "50";
+                            dateTab.Height = "15";
+                            dateTab.FontSize = "Size9";
+                            dateTab.Font = "Arial";
+                            signer.Tabs.DateTabs.Add(dateTab);
+                        }
+
+                        for (int c = 1; c <= 5; c++)
+                        {
+                            Checkbox checkBox = new Checkbox();
+                            checkBox.DocumentId = "1";
+                            checkBox.RecipientId = "1";
+                            checkBox.AnchorString = "cu0$chk" + c;
+                            checkBox.TabLabel = "MSRCheckBox" + c;
+                            checkBox.AnchorXOffset = "0";
+                            checkBox.AnchorYOffset = "0";
+                            checkBox.AnchorUnits = "inches";
+                            checkBox.AnchorIgnoreIfNotPresent = "true";
+
+                            signer.Tabs.CheckboxTabs.Add(checkBox);
+                        }
+
+                        envDef.Recipients.Signers.Add(signer);
+                    }
+                }
+
+                if (docDetails.JointSignerDetails != null && docDetails.JointSignerDetails.Count > 0)
+                {
+                    for (int i = 0; i < docDetails.JointSignerDetails.Count; i++)
+                    {
+                        if (docDetails.JointSignerDetails.ElementAt(i).IsInPerson.ToLower() == "true")
+                        {
+                            InPersonSigner jointSigner = new InPersonSigner();
+                            jointSigner.Tabs = new Tabs();
+                            jointSigner.Tabs.SignHereTabs = new List<SignHere>();
+                            jointSigner.Tabs.DateSignedTabs = new List<DateSigned>();
+                            jointSigner.Tabs.TextTabs = new List<Text>();
+                            jointSigner.Tabs.DateTabs = new List<Date>();
+                            jointSigner.Tabs.CheckboxTabs = new List<Checkbox>();
+
+                            //jointSigner.Name = docDetails.JointSignerDetails[i].ReciName;
+                            //jointSigner.Email = docDetails.JointSignerDetails[i].ReciEmail;
+                            //jointSigner.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            //jointSigner.RoutingOrder = docDetails.JointSignerDetails[i].ReciId;
+
+                            jointSigner.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            jointSigner.RoutingOrder = docDetails.JointSignerDetails[i].ReciId;
+                            jointSigner.InPersonSigningType = "inPersonSigner";
+                            jointSigner.SignerName = docDetails.JointSignerDetails[i].ReciName;
+                            jointSigner.HostName = CUName;
+                            jointSigner.HostEmail = CUEmail;
+
+                            SignHere jointSignerTab = new SignHere();
+                            jointSignerTab.DocumentId = "1";
+                            jointSignerTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            jointSignerTab.AnchorString = "Joint0w$ign" + (i + 1);
+                            jointSignerTab.AnchorXOffset = "0";
+                            jointSignerTab.AnchorYOffset = "0";
+                            jointSignerTab.AnchorUnits = "inches";
+                            jointSignerTab.AnchorIgnoreIfNotPresent = "true";
+
+                            jointSigner.Tabs.SignHereTabs.Add(jointSignerTab);
+
+                            DateSigned jointSigned = new DateSigned();
+                            jointSigned.DocumentId = "1";
+                            jointSigned.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            jointSigned.AnchorString = "Joint0w$date" + (i + 1);
+                            jointSigned.AnchorXOffset = "0";
+                            jointSigned.AnchorYOffset = "0";
+                            jointSigned.AnchorUnits = "inches";
+                            jointSigned.AnchorIgnoreIfNotPresent = "true";
+
+                            jointSigner.Tabs.DateSignedTabs.Add(jointSigned);
+
+                            Text textTab = new Text();
+                            textTab.DocumentId = "1";
+                            textTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            textTab.AnchorString = "joint1$1nput";
+                            textTab.AnchorXOffset = "0";
+                            textTab.AnchorYOffset = "-3";
+                            textTab.AnchorUnits = "pixels";
+                            textTab.AnchorIgnoreIfNotPresent = "true";
+                            textTab.AnchorMatchWholeWord = "true";
+                            textTab.Required = "false";
+                            textTab.Width = "75";
+                            textTab.Height = "15";
+                            textTab.FontSize = "Size10";
+                            textTab.Font = "TimesNewRoman";
+                            jointSigner.Tabs.TextTabs.Add(textTab);
+
+                            Date dateTab = new Date();
+                            dateTab.DocumentId = "1";
+                            dateTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            dateTab.AnchorString = "joint$D01B$";
+                            dateTab.TabLabel = "date1";
+                            dateTab.AnchorXOffset = "0";
+                            dateTab.AnchorYOffset = "-3";
+                            dateTab.AnchorUnits = "pixels";
+                            dateTab.AnchorIgnoreIfNotPresent = "true";
+                            dateTab.AnchorMatchWholeWord = "true";
+                            dateTab.Required = "false";
+                            dateTab.Width = "50";
+                            dateTab.Height = "15";
+                            dateTab.FontSize = "Size9";
+                            dateTab.Font = "Arial";
+                            jointSigner.Tabs.DateTabs.Add(dateTab);
+
+                            for (int c = 1; c <= 5; c++)
+                            {
+                                Checkbox checkBox = new Checkbox();
+                                checkBox.DocumentId = "1";
+                                checkBox.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                                checkBox.AnchorString = "cu0$chk" + c;
+                                checkBox.TabLabel = "MSRCheckBox" + c;
+                                checkBox.AnchorXOffset = "0";
+                                checkBox.AnchorYOffset = "0";
+                                checkBox.AnchorUnits = "inches";
+                                checkBox.AnchorIgnoreIfNotPresent = "true";
+
+                                jointSigner.Tabs.CheckboxTabs.Add(checkBox);
+                            }
+
+                            envDef.Recipients.InPersonSigners.Add(jointSigner);
+                        }
+                        else
+                        {
+
+                            Signer jointSigner = new Signer();
+                            jointSigner.Tabs = new Tabs();
+                            jointSigner.Tabs.SignHereTabs = new List<SignHere>();
+                            jointSigner.Tabs.DateSignedTabs = new List<DateSigned>();
+                            jointSigner.Tabs.TextTabs = new List<Text>();
+                            jointSigner.Tabs.DateTabs = new List<Date>();
+                            jointSigner.Tabs.CheckboxTabs = new List<Checkbox>();
+
+                            jointSigner.Name = docDetails.JointSignerDetails[i].ReciName;
+                            jointSigner.Email = docDetails.JointSignerDetails[i].ReciEmail;
+                            jointSigner.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            jointSigner.RoutingOrder = docDetails.JointSignerDetails[i].ReciId;
+
+
+                            SignHere jointSignerTab = new SignHere();
+                            jointSignerTab.DocumentId = "1";
+                            jointSignerTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            jointSignerTab.AnchorString = "Joint0w$ign" + (i + 1);
+                            jointSignerTab.AnchorXOffset = "0";
+                            jointSignerTab.AnchorYOffset = "0";
+                            jointSignerTab.AnchorUnits = "inches";
+                            jointSignerTab.AnchorIgnoreIfNotPresent = "true";
+
+                            jointSigner.Tabs.SignHereTabs.Add(jointSignerTab);
+
+                            DateSigned jointSigned = new DateSigned();
+                            jointSigned.DocumentId = "1";
+                            jointSigned.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            jointSigned.AnchorString = "Joint0w$date" + (i + 1);
+                            jointSigned.AnchorXOffset = "0";
+                            jointSigned.AnchorYOffset = "0";
+                            jointSigned.AnchorUnits = "inches";
+                            jointSigned.AnchorIgnoreIfNotPresent = "true";
+
+                            jointSigner.Tabs.DateSignedTabs.Add(jointSigned);
+
+                            Text textTab = new Text();
+                            textTab.DocumentId = "1";
+                            textTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            textTab.AnchorString = "joint1$1nput";
+                            textTab.AnchorXOffset = "0";
+                            textTab.AnchorYOffset = "-3";
+                            textTab.AnchorUnits = "pixels";
+                            textTab.AnchorIgnoreIfNotPresent = "true";
+                            textTab.AnchorMatchWholeWord = "true";
+                            textTab.Required = "false";
+                            textTab.Width = "75";
+                            textTab.Height = "15";
+                            textTab.FontSize = "Size10";
+                            textTab.Font = "TimesNewRoman";
+                            jointSigner.Tabs.TextTabs.Add(textTab);
+
+                            Date dateTab = new Date();
+                            dateTab.DocumentId = "1";
+                            dateTab.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                            dateTab.AnchorString = "joint$D01B$";
+                            dateTab.TabLabel = "date1";
+                            dateTab.AnchorXOffset = "0";
+                            dateTab.AnchorYOffset = "-3";
+                            dateTab.AnchorUnits = "pixels";
+                            dateTab.AnchorIgnoreIfNotPresent = "true";
+                            dateTab.AnchorMatchWholeWord = "true";
+                            dateTab.Required = "false";
+                            dateTab.Width = "50";
+                            dateTab.Height = "15";
+                            dateTab.FontSize = "Size9";
+                            dateTab.Font = "Arial";
+                            jointSigner.Tabs.DateTabs.Add(dateTab);
+
+                            for (int c = 1; c <= 5; c++)
+                            {
+                                Checkbox checkBox = new Checkbox();
+                                checkBox.DocumentId = "1";
+                                checkBox.RecipientId = docDetails.JointSignerDetails[i].ReciId;
+                                checkBox.AnchorString = "cu0$chk" + c;
+                                checkBox.TabLabel = "MSRCheckBox" + c;
+                                checkBox.AnchorXOffset = "0";
+                                checkBox.AnchorYOffset = "0";
+                                checkBox.AnchorUnits = "inches";
+                                checkBox.AnchorIgnoreIfNotPresent = "true";
+
+                                jointSigner.Tabs.CheckboxTabs.Add(checkBox);
+                            }
+
+                            envDef.Recipients.Signers.Add(jointSigner);
+                        }
                     }
                 }
 

@@ -346,10 +346,11 @@ namespace DocuSignAPI
                     if (ODCFiles != null)
                         b64Docs.fileDetails.AddRange(ODCFiles);                 //Append ODC Form files with other Documents to send for DocuSign
 
-                    
+                    //File.WriteAllBytes(@"E:\\ZZZ\\ben.docx" , Convert.FromBase64String(b64Docs.fileDetails.ElementAt(0).base64WordDoc));
+
                     if (dataList.ElementAt(0).ExistingOrNewMember == "New")
                     {
-                        docuSignIDTROJoint = dalObj.SendforESign(obj, b64Docs.fileDetails.Where(f => f.id == "1").ToList());
+                        docuSignIDTROJoint = dalObj.SendforESign(obj, b64Docs.fileDetails.Where(f => f.id == "1").ToList(),CUName,CUEmail);
                         if (!string.IsNullOrEmpty(docuSignIDTROJoint))
                             connector.UpdateDocuSignSubmit(id, docuSignIDTROJoint, "MemberServiceRequest.pdf", "1");
                     }
@@ -358,12 +359,12 @@ namespace DocuSignAPI
                     {
                         var obj2 = obj;
                         obj2.JointSignerDetails = new List<SignerInfo>();
-                        docuSignIDTRO = dalObj.SendforESign(obj2, b64Docs.fileDetails.Where(f => f.id != "1").ToList());
+                        docuSignIDTRO = dalObj.SendforESign(obj2, b64Docs.fileDetails.Where(f => f.id != "1").ToList(),CUName,CUEmail);
                         if (!string.IsNullOrEmpty(docuSignIDTRO))
                         {
                             for (int i = 1; i < b64Docs.fileDetails.Count(); i++)
                             {
-                                connector.UpdateDocuSignSubmit(id, docuSignIDTRO, b64Docs.fileDetails.ElementAt(i).name.Replace(".docx",".pdf"),
+                                connector.UpdateDocuSignSubmit(id, docuSignIDTRO, b64Docs.fileDetails.ElementAt(i).name.Replace(".docx", ".pdf"),
                                     b64Docs.fileDetails.ElementAt(i).id);
                             }
                         }
@@ -435,7 +436,8 @@ namespace DocuSignAPI
                 {
                     ReciName = dataList.ElementAt(0).MemberServiceRequestFullName,
                     ReciEmail = dataList.ElementAt(0).MemberServiceEmail,
-                    ReciId = Convert.ToString(++recepientLoop)
+                    ReciId = Convert.ToString(++recepientLoop),
+                    IsInPerson = dataList.ElementAt(0).IsInPersonSigner
                 });
                 #endregion
                 values.Add(new CLDocValue { Key = "DNAUser", Value = CUName });
@@ -848,7 +850,8 @@ namespace DocuSignAPI
             {
                 ReciName = dataList.MemberServiceRequestFullName,
                 ReciEmail = dataList.MemberServiceEmail,
-                ReciId = reciID
+                ReciId = reciID,
+                IsInPerson = dataList.IsInPersonSigner
             });
         }
 
@@ -878,7 +881,7 @@ namespace DocuSignAPI
             {
                 FileDetail file = new FileDetail();
                 file.path = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\OverdraftServicesConsentForm.docx";
-                file.name = $"OverdraftServicesConsentForm{i+1}.docx";
+                file.name = $"OverdraftServicesConsentForm{i + 1}.docx";
                 file.id = addedDocDount + "";
 
                 int recepientLoop = 0;
@@ -896,7 +899,8 @@ namespace DocuSignAPI
                     {
                         ReciName = dataList.ElementAt(0).MemberServiceRequestFullName,
                         ReciEmail = dataList.ElementAt(0).MemberServiceEmail,
-                        ReciId = Convert.ToString(++recepientLoop)
+                        ReciId = Convert.ToString(++recepientLoop),
+                        IsInPerson = dataList.ElementAt(0).IsInPersonSigner
                     });
                     #endregion
 
@@ -1251,29 +1255,29 @@ namespace DocuSignAPI
             return "";
         }
 
-        public SVCResults TestSendForSign(int id)
-        {
-            return SendforESign(id, "CUSuneer", "midhun.claysys@gmail.com");
-            //return SendforESign(3, "CUSuneer", "midhun.claysys@gmail.com");
-        }
-        public SVCResults TestFillDocument(string docName)
-        {
-            try
-            {
-                return FillDocument(3, "MIdhun K Jayan", "midhun.claysys@gmail.com", docName, 2, "123-456-7890");
-            }
-            catch (Exception exception)
-            {
-                results.status = "Error";
-                results.DocuSignID = "";
-                results.ErrorMessage = exception.Message;
-                results.InnerException = Convert.ToString(exception.InnerException);
-                results.FilledDocument = "";
-                Utility.LogAction("Exception " + exception.Message);
-                throw;
-            }
+        //public SVCResults TestSendForSign(int id)
+        //{
+        //    return SendforESign(id, "CUSuneer", "midhun.claysys@gmail.com");
+        //    //return SendforESign(3, "CUSuneer", "midhun.claysys@gmail.com");
+        //}
+        //public SVCResults TestFillDocument(string docName)
+        //{
+        //    try
+        //    {
+        //        return FillDocument(3, "MIdhun K Jayan", "midhun.claysys@gmail.com", docName, 2, "123-456-7890");
+        //    }
+        //    catch (Exception exception)
+        //    {
+        //        results.status = "Error";
+        //        results.DocuSignID = "";
+        //        results.ErrorMessage = exception.Message;
+        //        results.InnerException = Convert.ToString(exception.InnerException);
+        //        results.FilledDocument = "";
+        //        Utility.LogAction("Exception " + exception.Message);
+        //        throw;
+        //    }
 
-        }
+        //}
     }
 }
 

@@ -169,7 +169,7 @@ namespace FillTheDoc.Utils
                         data.ScoreDetails = Convert.ToString(Value(reader,"ScoreDetails",""));
 
                         data.ExistingOrNewMember = Convert.ToString(Value(reader, "ExistingOrNewMember", ""));
-                        //data.IsInPersonSigner = Convert.ToString(Value(reader, "IsInPersonSigner", ""));
+                        data.IsInPersonSigner = Convert.ToString(Value(reader, "IsInPersonSigner", ""));
 
 
                         dataList.Add(data);
