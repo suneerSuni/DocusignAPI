@@ -32,7 +32,7 @@ namespace FillTheDoc.Utils
 
         private string _insertDownloadStatusProcName = ConfigurationManager.AppSettings["UpdateDownloadDocStatusProcName"];
         private string _insertLoanGuarantyDownloadStatusProcName = ConfigurationManager.AppSettings["UpdateLoanGuarantyDownloadDocStatusProcName"];
-
+      
         private SqlConnection _sqlCon = null;
 
         #endregion
@@ -73,7 +73,7 @@ namespace FillTheDoc.Utils
             try
             {
                 List<DocumentFields> dataList = new List<DocumentFields>();
-
+               
                 using (_sqlCon = new SqlConnection(_connectionString))
                 {
                     _sqlCon.Open();
@@ -84,16 +84,18 @@ namespace FillTheDoc.Utils
 
                     SqlDataReader reader = sql_cmnd.ExecuteReader();
                     DocumentFields data = null;
-
+                    int BenCount = 0;
                     while (reader.Read())
                     {
                         data = new DocumentFields();
 
-                        data.BenDesiBeneficiary = Convert.ToString(Value(reader, "BenDesiBeneficiary", "")); 
+                        data.RegularSavingAccountNumber = Convert.ToString(Value(reader, "RegularAccountNumber", ""));
+                        data.BenDesiBeneficiary = Convert.ToString(Value(reader, "BenDesiBeneficiary", ""));
                         data.BenDesiNameRelationShip = Convert.ToString(Value(reader, "BenDesiNameRelationShip", ""));
-                        data.BenDesiNameSSNNumber = Convert.ToString(Value(reader, "BenDesiNameSSNNumber", "")); 
-                        data.BenDesiNameDOB = Convert.ToString(Value(reader, "BenDesiNameDOB", "")); 
-                        data.BenDesiNameDate = Convert.ToString(Value(reader, "BenDesiNameDate", "")); 
+                        try { data.BenDesiNameSSNNumber = Convert.ToString(Value(reader, "BenDesiNameSSNNumber", "")); }
+                        catch (Exception Ex) { Utility.LogAction("Unable to Decrypt for SSNID:" + id + Ex.Message); continue; }
+                        data.BenDesiNameDOB = Convert.ToString(Value(reader, "BenDesiNameDOB", ""));
+                        data.BenDesiNameDate = Convert.ToString(Value(reader, "BenDesiNameDate", ""));
                         data.BenDesiMemberNumber = Convert.ToString(Value(reader, "BenDesiMemberNumber", ""));
 
 
@@ -102,59 +104,60 @@ namespace FillTheDoc.Utils
                         data.DirectDepositVeriFullName = Convert.ToString(Value(reader, "DirectDepositVeriFullName", ""));
 
                         data.DirectDepositCheckings = Convert.ToString(Value(reader, "DirectDepositCheckings", ""));
-                        data.DirectDepositSavings = Convert.ToString(Value(reader, "DirectDepositSavings", "")); 
-                        data.MemberServiceRequestMemberInfo = Convert.ToString(Value(reader, "MemberServiceRequestMemberInfo", "")); 
-                        data.MemberServiceRequestFullName = Convert.ToString(Value(reader, "MemberServiceRequestFullName", "")); 
-                        data.MemberServiceRequestMailingAddress = Convert.ToString(Value(reader, "MemberServiceRequestMailingAddress", "")); 
+                        data.DirectDepositSavings = Convert.ToString(Value(reader, "DirectDepositSavings", ""));
+                        data.MemberServiceRequestMemberInfo = Convert.ToString(Value(reader, "MemberServiceRequestMemberInfo", ""));
+                        data.MemberServiceRequestFullName = Convert.ToString(Value(reader, "MemberServiceRequestFullName", ""));
+                        data.MemberServiceRequestMailingAddress = Convert.ToString(Value(reader, "MemberServiceRequestMailingAddress", ""));
                         data.MemberServiceRequestIDType = Convert.ToString(Value(reader, "MemberServiceRequestIDType", ""));
                         data.MemberServiceCityStateZip1 = Convert.ToString(Value(reader, "MemberServiceCityStateZip1", ""));
-                        data.MemberServiceIDNumber = Convert.ToString(Value(reader, "MemberServiceIDNumber", "")); 
+                        data.MemberServiceIDNumber = Convert.ToString(Value(reader, "MemberServiceIDNumber", ""));
 
 
                         data.MemberServiceRequestPhysicalAddress = Convert.ToString(Value(reader, "MemberServiceRequestPhysicalAddress", ""));
-                        data.MemberServiceRequestIDIssueState = Convert.ToString(Value(reader, "MemberServiceRequestIDIssueState", "")); 
+                        data.MemberServiceRequestIDIssueState = Convert.ToString(Value(reader, "MemberServiceRequestIDIssueState", ""));
                         data.MemberServiceRequestIDIssueDate = Convert.ToString(Value(reader, "MemberServiceRequestIDIssueDate", ""));
                         data.MemberServiceCityStateZip2 = Convert.ToString(Value(reader, "MemberServiceCityStateZip2", ""));
-                        data.MemberServiceIDExpDate =  Convert.ToString(Value(reader, "MemberServiceIDExpDate", "")); 
-                        data.MemberServiceDOB = Convert.ToString(Value(reader, "MemberServiceDOB", "")); 
-                        data.MemberServiceHomePhone = Convert.ToString(Value(reader, "MemberServiceHomePhone", "")); 
+                        data.MemberServiceIDExpDate = Convert.ToString(Value(reader, "MemberServiceIDExpDate", ""));
+                        data.MemberServiceDOB = Convert.ToString(Value(reader, "MemberServiceDOB", ""));
+                        data.MemberServiceHomePhone = Convert.ToString(Value(reader, "MemberServiceHomePhone", ""));
 
-                        data.MemberServiceEmail = Convert.ToString(Value(reader, "MemberServiceEmail", "")); 
-                        data.MemberServiceCell = Convert.ToString(Value(reader, "MemberServiceCell", "")); 
+                        data.MemberServiceEmail = Convert.ToString(Value(reader, "MemberServiceEmail", ""));
+                        data.MemberServiceCell = Convert.ToString(Value(reader, "MemberServiceCell", ""));
                         data.MemberServiceWorkPhone = Convert.ToString(Value(reader, "MemberServiceWorkPhone", ""));
                         data.MemberServiceFaxMachine = Convert.ToString(Value(reader, "MemberServiceFaxMachine", ""));
-                        data.MemberServiceEmployer = Convert.ToString(Value(reader, "MemberServiceEmployer", "")); 
-                        data.MemberServiceOccupationTitle = Convert.ToString(Value(reader, "MemberServiceOccupationTitle", "")); 
+                        data.MemberServiceEmployer = Convert.ToString(Value(reader, "MemberServiceEmployer", ""));
+                        data.MemberServiceOccupationTitle = Convert.ToString(Value(reader, "MemberServiceOccupationTitle", ""));
                         data.MemberServiceClubCheck = Convert.ToString(Value(reader, "MemberServiceClubCheck", ""));
                         data.MemberServiceCheckingAcc = Convert.ToString(Value(reader, "MemberServiceCheckingAcc", ""));
 
 
-                        data.MemberServiceCheckingAccChk = Convert.ToString(Value(reader, "MemberServiceCheckingAccChk", "")); 
-                        data.MemberServiceMoneyMarketChk = Convert.ToString(Value(reader, "MemberServiceMoneyMarketChk", "")); 
-                        data.RetailAccountChangeMemberName = Convert.ToString(Value(reader, "RetailAccountChangeMemberName", "")); 
-                        data.RetailAccountChangeMemberNumber = Convert.ToString(Value(reader, "RetailAccountChangeMemberNumber", "")); 
-                        data.RetailAccountChangeSSNNumber = Convert.ToString(Value(reader, "RetailAccountChangeSSNNumber", ""));
+                        data.MemberServiceCheckingAccChk = Convert.ToString(Value(reader, "MemberServiceCheckingAccChk", ""));
+                        data.MemberServiceMoneyMarketChk = Convert.ToString(Value(reader, "MemberServiceMoneyMarketChk", ""));
+                        data.RetailAccountChangeMemberName = Convert.ToString(Value(reader, "RetailAccountChangeMemberName", ""));
+                        data.RetailAccountChangeMemberNumber = Convert.ToString(Value(reader, "RetailAccountChangeMemberNumber", ""));
+                        try { data.RetailAccountChangeSSNNumber = Convert.ToString(Value(reader, "RetailAccountChangeSSNNumber", "")); }
+                        catch (Exception Ex) { Utility.LogAction("Unable to Decrypt for SSNID:" + id + Ex.Message); continue; }
                         data.RetailAccountChangeMailingAddress = Convert.ToString(Value(reader, "RetailAccountChangeMailingAddress", ""));
-                        data.RetailAccountChangeCityStateZip = Convert.ToString(Value(reader, "RetailAccountChangeCityStateZip", "")); 
+                        data.RetailAccountChangeCityStateZip = Convert.ToString(Value(reader, "RetailAccountChangeCityStateZip", ""));
 
-                        data.RetailAccountChangeIDNumber= Convert.ToString(Value(reader, "RetailAccountChangeIDNumber", "")); 
-                        data.RetailAccountChangeIssuedDate =Convert.ToString(Value(reader, "RetailAccountChangeIssuedDate", "")); 
-                        data.RetailAccountChangeExpDate =  Convert.ToString(Value(reader, "RetailAccountChangeExpDate", "")); 
+                        data.RetailAccountChangeIDNumber= Convert.ToString(Value(reader, "RetailAccountChangeIDNumber", ""));
+                        data.RetailAccountChangeIssuedDate =Convert.ToString(Value(reader, "RetailAccountChangeIssuedDate", ""));
+                        data.RetailAccountChangeExpDate =  Convert.ToString(Value(reader, "RetailAccountChangeExpDate", ""));
                         data.RetailAccountChangePhone = Convert.ToString(Value(reader, "RetailAccountChangePhone", ""));
-                        data.RetailAccountChangeWorkPhone = Convert.ToString(Value(reader, "RetailAccountChangeWorkPhone", "")); 
+                        data.RetailAccountChangeWorkPhone = Convert.ToString(Value(reader, "RetailAccountChangeWorkPhone", ""));
                         data.RetailAccountChangeCellPhone = Convert.ToString(Value(reader, "RetailAccountChangeCellPhone", ""));
-                        data.RetailAccountChangeEmployer = Convert.ToString(Value(reader, "RetailAccountChangeEmployer", "")); 
+                        data.RetailAccountChangeEmployer = Convert.ToString(Value(reader, "RetailAccountChangeEmployer", ""));
 
-                        data.RetailAccountChangeDOB =Convert.ToString(Value(reader, "RetailAccountChangeDOB", "")); 
+                        data.RetailAccountChangeDOB = Convert.ToString(Value(reader, "RetailAccountChangeDOB", ""));
                         data.RetailAccountChangeOccupation = Convert.ToString(Value(reader, "RetailAccountChangeOccupation", ""));
-                        data.RetailAccountChangeEmail = Convert.ToString(Value(reader, "RetailAccountChangeEmail", "")); 
+                        data.RetailAccountChangeEmail = Convert.ToString(Value(reader, "RetailAccountChangeEmail", ""));
 
-                        data.RetailAccountChangeClubCheck = Convert.ToString(Value(reader, "RetailAccountChangeClubCheck", "")); 
-                        data.RetailAccountChangeCheckingAcc = Convert.ToString(Value(reader, "RetailAccountChangeCheckingAcc", "")); 
+                        data.RetailAccountChangeClubCheck = Convert.ToString(Value(reader, "RetailAccountChangeClubCheck", ""));
+                        data.RetailAccountChangeCheckingAcc = Convert.ToString(Value(reader, "RetailAccountChangeCheckingAcc", ""));
                         data.RetailAccountChangeAccChk = Convert.ToString(Value(reader, "RetailAccountChangeAccChk", ""));
                         data.RetailAccountChangeMoneyMarketChk = Convert.ToString(Value(reader, "RetailAccountChangeMoneyMarketChk", ""));
 
-                        data.SavingProducts = Convert.ToString(Value(reader, "SavingProducts", "")); 
+                        data.SavingProducts = Convert.ToString(Value(reader, "SavingProducts", ""));
                         data.CheckingProducts = Convert.ToString(Value(reader, "CheckingProducts", ""));
                         data.CertificateProducts = Convert.ToString(Value(reader, "CertificateProducts", ""));
                         data.CertificateAccountNumbers = Convert.ToString(Value(reader, "CertificateAccountNumbers", ""));
@@ -166,19 +169,27 @@ namespace FillTheDoc.Utils
                         data.MemberState = Convert.ToString(Value(reader, "MemberState", ""));
                         data.MemberZip = Convert.ToString(Value(reader, "MemberZip", ""));
                         data.CreditScore = Convert.ToString(Value(reader, "CreditScore", ""));
-                        data.ScoreDetails = Convert.ToString(Value(reader,"ScoreDetails",""));
+                        data.ScoreDetails = Convert.ToString(Value(reader, "ScoreDetails", ""));
 
                         data.ExistingOrNewMember = Convert.ToString(Value(reader, "ExistingOrNewMember", ""));
                         data.IsInPersonSigner = Convert.ToString(Value(reader, "IsInPersonSigner", ""));
-
-
+                        data.Fname = Convert.ToString(Value(reader, "Fname", ""));
+                        data.Lname = Convert.ToString(Value(reader, "Lname", ""));
+                        if (BenCount == 0)
+                        {
+                            data.BenificiaryDocDetails=Convert.ToString(Value(reader, "BenificiaryDetails", ""));                         
+                            BenCount++;
+                        }
                         dataList.Add(data);
 
                     }
-                    _sqlCon.Close();
+                    reader.Close();
                 }
-                if (Utility.IsEventLogged) Utility.LogAction("Procedure executed successfully");
-                return dataList;
+               
+                   _sqlCon.Close();
+                  if (Utility.IsEventLogged) Utility.LogAction("Procedure executed successfully");
+            return dataList;
+                
             }
             catch (Exception ex)
             {
@@ -186,6 +197,9 @@ namespace FillTheDoc.Utils
                 return new List<DocumentFields>();
             }
         }
+
+       
+        
         internal static T Value<T>(IDataRecord reader, string fldName, T defaultVal)
         {
             object o;

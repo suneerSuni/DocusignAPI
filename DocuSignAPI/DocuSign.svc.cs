@@ -21,7 +21,7 @@ namespace DocuSignAPI
     public class DocuSignService : IDocuSignService
     {
         SVCResults results = new SVCResults();
-        int addedDocDount = 2;
+        int addedDocDount = 3;
         Base64WordDocs b64Docs;
         List<FileDetail> ODCFiles;
 
@@ -87,8 +87,9 @@ namespace DocuSignAPI
         //    }
         //}
         #endregion
-        public SVCResults FillDocument(int id, string CUName, string CUEmail, string DocuName, int dCount, string accountNo)
+        public SVCResults FillDocument(int id, string CUName, string CUEmail, string DocuName, int dCount, string accountNo,string docType= "SignatureDocument")
         {
+            
             string InvalidFileName = string.Empty;
             string docuSignID = string.Empty;
             try
@@ -108,8 +109,11 @@ namespace DocuSignAPI
                     obj = BuildDocuSignDocFieldsODC(dataList, accountNo);
                 else
                     obj = BuildDocuSignDocFields(dataList, CUName, CUEmail, accountNo);
+
+                #region FILE CHECK
                 switch (DocuName)
                 {
+
                     case "MemberServiceRequest.docx":
                         if ((dataList.Count - 1) <= 3)
                         {
@@ -246,10 +250,25 @@ namespace DocuSignAPI
                         InvalidFileName = DocuName + " - not found!";
                         break;
                 }
+                #endregion
+
                 var dFile = b64Docs.fileDetails.ElementAt(0);
                 RetFileString = new WordReader().FillValuesToDoc(File.ReadAllBytes(dFile.path), "", obj);
 
-                //File.WriteAllBytes(@"E:\\ZZZ\\" + dFile.name, Convert.FromBase64String(RetFileString));
+
+                byte[] filearray = Convert.FromBase64String(RetFileString);
+
+
+                string membernumber = dataList[0].BenDesiMemberNumber;
+                string SSN = dataList[0].BenDesiNameSSNNumber;
+                string firstname = dataList[0].Fname;
+                string lastname = dataList[0].Lname;
+                string RegAccountNumber = dataList[0].RegularSavingAccountNumber;
+
+                if (docType=="NonSignatureDocument")
+                {
+                    dalObj.SaveToLocation(filearray, DocuName, membernumber, SSN, firstname, lastname, RegAccountNumber,id,accountNo,dCount);
+                }
 
                 results.status = "Success";
                 results.DocuSignID = "";
@@ -287,7 +306,7 @@ namespace DocuSignAPI
                 string folderPath = "Folder3";
                 if (dataList.Count() > 0)
                 {
-
+                    #region MSR filecheck
                     if ((dataList.Count - 1) <= 3)
                     {
                         folderPath = "Folder3";
@@ -315,16 +334,40 @@ namespace DocuSignAPI
                         file.id = "1";
                         b64Docs.fileDetails.Add(file);
                     }
+                    #endregion
 
-                    //DirectDeposite changed to non signature
+                    #region RETAIL ACCOUNT filecheck
+                    if ((dataList.Count - 1) <= 3)
+                    {
+                        folderPath = "Folder3";
+                        file = new FileDetail();
+                        file.path = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\RetailAccountChangeForm.docx";
+                        file.name = "RetailAccountChangeForm.docx";
+                        file.id = "2";
+                        b64Docs.fileDetails.Add(file);
+                    }
+                    else if ((dataList.Count - 1) <= 6)
+                    {
+                        folderPath = "Folder6";
+                        file = new FileDetail();
+                        file.path = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\RetailAccountChangeForm.docx";
+                        file.name = "RetailAccountChangeForm.docx";
+                        file.id = "2";
+                        b64Docs.fileDetails.Add(file);
+                    }
+                    else if ((dataList.Count - 1) <= 9)
+                    {
+                        folderPath = "Folder9";
+                        file = new FileDetail();
+                        file.path = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\" + folderPath + "\\RetailAccountChangeForm.docx";
+                        file.name = "RetailAccountChangeForm.docx";
+                        file.id = "2";
+                        b64Docs.fileDetails.Add(file);
+                    }
 
-                    //file = new FileDetail();
-                    //file.path = string.Concat(ConfigurationManager.AppSettings["FilePath"]) + "\\DirectDepositAccountVerification.docx";
-                    //file.name = "DirectDepositAccountVerification.docx";
-                    //file.id = addedDocDount + "";
-                    //b64Docs.fileDetails.Add(file);
-                    //++addedDocDount;
+                    #endregion
 
+                    #region BENIFICIARY filecheck
                     if (!string.IsNullOrEmpty(Convert.ToString(dataList.ElementAt(0).BenDesiBeneficiary)))
                     {
                         file = new FileDetail();
@@ -334,38 +377,52 @@ namespace DocuSignAPI
                         b64Docs.fileDetails.Add(file);
                         ++addedDocDount;
                     }
+                    #endregion
 
-                    var obj = BuildDocuSignDocFields(dataList, CUName, CUEmail);
+                    var obj = BuildDocuSignDocFields(dataList, CUName, CUEmail);        // MemberServiceRequest doc fill
+                    b64Docs.fileDetails[0].base64WordDoc = new WordReader().FillValuesToDoc(File.ReadAllBytes(b64Docs.fileDetails[0].path), "", obj);
 
-                    foreach (var dFile in b64Docs.fileDetails)
+                    var obj1 = BuildDocuSignDocFieldsRetailAccountChange(dataList, CUName, CUEmail); // RetailAccountChangeForm doc fill
+                    b64Docs.fileDetails[1].base64WordDoc = new WordReader().FillValuesToDoc(File.ReadAllBytes(b64Docs.fileDetails[1].path), "", obj1);
+
+                    if (!string.IsNullOrEmpty(Convert.ToString(dataList.ElementAt(0).BenDesiBeneficiary))) // BeneficiaryDesignation doc fill
                     {
-                        dFile.base64WordDoc = new WordReader().FillValuesToDoc(File.ReadAllBytes(dFile.path), "", obj);
+
+                        b64Docs.fileDetails[2].base64WordDoc = new WordReader().FillValuesToDoc(File.ReadAllBytes(b64Docs.fileDetails[2].path), "", obj);
+
                     }
+
 
                     BuildDocuSignDocsODC(dataList, CUName, CUEmail);        //OverDraftConsentForms Repeat and Fill Logic
                     if (ODCFiles != null)
-                        b64Docs.fileDetails.AddRange(ODCFiles);                 //Append ODC Form files with other Documents to send for DocuSign
+                        b64Docs.fileDetails.AddRange(ODCFiles);             //Append ODC Form files with other Documents to send for DocuSign
 
-                    //File.WriteAllBytes(@"E:\\ZZZ\\ben.docx" , Convert.FromBase64String(b64Docs.fileDetails.ElementAt(0).base64WordDoc));
+
 
                     if (dataList.ElementAt(0).ExistingOrNewMember == "New")
                     {
-                        docuSignIDTROJoint = dalObj.SendforESign(obj, b64Docs.fileDetails.Where(f => f.id == "1").ToList(),CUName,CUEmail);
+                        docuSignIDTROJoint = dalObj.SendforESign(obj, b64Docs.fileDetails.Where(f => (f.id == "1")).ToList(), CUName, CUEmail);
                         if (!string.IsNullOrEmpty(docuSignIDTROJoint))
                             connector.UpdateDocuSignSubmit(id, docuSignIDTROJoint, "MemberServiceRequest.pdf", "1");
                     }
+                    else
+                    {
+                        docuSignIDTROJoint = dalObj.SendforESign(obj1, b64Docs.fileDetails.Where(f => (f.id == "2")).ToList(), CUName, CUEmail);
+                        if (!string.IsNullOrEmpty(docuSignIDTROJoint))
+                            connector.UpdateDocuSignSubmit(id, docuSignIDTROJoint, "RetailAccountChangeForm.pdf", "2");
+                    }
 
-                    if (b64Docs.fileDetails.Count() > 1)
+                    if (b64Docs.fileDetails.Count() > 2)
                     {
                         var obj2 = obj;
                         obj2.JointSignerDetails = new List<SignerInfo>();
-                        docuSignIDTRO = dalObj.SendforESign(obj2, b64Docs.fileDetails.Where(f => f.id != "1").ToList(),CUName,CUEmail);
+                        docuSignIDTRO = dalObj.SendforESign(obj2, b64Docs.fileDetails.Where(f => (Convert.ToInt32(f.id) > 2)).ToList(), CUName, CUEmail);
                         if (!string.IsNullOrEmpty(docuSignIDTRO))
                         {
-                            for (int i = 1; i < b64Docs.fileDetails.Count(); i++)
+                            for (int i = 2; i < b64Docs.fileDetails.Count(); i++)
                             {
                                 connector.UpdateDocuSignSubmit(id, docuSignIDTRO, b64Docs.fileDetails.ElementAt(i).name.Replace(".docx", ".pdf"),
-                                    b64Docs.fileDetails.ElementAt(i).id);
+                                b64Docs.fileDetails.ElementAt(i).id);
                             }
                         }
                     }
@@ -410,389 +467,415 @@ namespace DocuSignAPI
 
         private SendDocumentInfo BuildDocuSignDocFields(List<DocumentFields> dataList, string CUName, string CUEmail, string accountNo = "")
         {
-            int recepientLoop = 0;
-
-            SendDocumentInfo sDocInfo = new SendDocumentInfo();
-
-            List<SignerInfo> signerDetails = new List<SignerInfo>();
-            List<SignerInfo> jointSignerDetails = new List<SignerInfo>();
-
-            List<CLDocValue> values = new List<CLDocValue>();
-
-            if (dataList.Count() > 0)
+            try
             {
-                values.Add(new CLDocValue { Key = "BENEFICIARYPOD", Value = dataList.ElementAt(0).BenDesiBeneficiary });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiMemberNumber });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameDate });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameDOB });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameRelationShip });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameSSNNumber });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).DirectDepositVeriFullName });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).DirectDepositSavings });
-                //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).DirectDepositCheckings });
+                int recepientLoop = 0;
 
-                #region signerDetails
-                signerDetails.Add(new SignerInfo()
+                SendDocumentInfo sDocInfo = new SendDocumentInfo();
+
+                List<SignerInfo> signerDetails = new List<SignerInfo>();
+                List<SignerInfo> jointSignerDetails = new List<SignerInfo>();
+
+                List<CLDocValue> values = new List<CLDocValue>();
+
+                if (dataList.Count() > 0)
                 {
-                    ReciName = dataList.ElementAt(0).MemberServiceRequestFullName,
-                    ReciEmail = dataList.ElementAt(0).MemberServiceEmail,
-                    ReciId = Convert.ToString(++recepientLoop),
-                    IsInPerson = dataList.ElementAt(0).IsInPersonSigner
-                });
-                #endregion
-                values.Add(new CLDocValue { Key = "DNAUser", Value = CUName });
-                values.Add(new CLDocValue { Key = "date", Value = DateTime.Now.ToString("MM/dd/yyyy") });
-                values.Add(new CLDocValue { Key = "Date", Value = DateTime.Now.ToString("MM/dd/yyyy") });
-                values.Add(new CLDocValue { Key = "MemberFullName", Value = dataList.ElementAt(0).MemberServiceRequestFullName });
-                values.Add(new CLDocValue { Key = "MemberNo", Value = dataList.ElementAt(0).MemberServiceRequestMemberInfo });
-                values.Add(new CLDocValue { Key = "MemberName", Value = dataList.ElementAt(0).MemberServiceRequestFullName });
-                values.Add(new CLDocValue { Key = "MailingAddress", Value = dataList.ElementAt(0).MemberServiceRequestMailingAddress });
-                values.Add(new CLDocValue { Key = "IdType", Value = dataList.ElementAt(0).MemberServiceRequestIDType });
-                values.Add(new CLDocValue { Key = "City", Value = dataList.ElementAt(0).MemberServiceCityStateZip1 });
-                values.Add(new CLDocValue { Key = "MemberCity", Value = dataList.ElementAt(0).MemberCity });
-                values.Add(new CLDocValue { Key = "MemberState", Value = dataList.ElementAt(0).MemberState });
-                values.Add(new CLDocValue { Key = "MemberZip", Value = dataList.ElementAt(0).MemberZip });
-                values.Add(new CLDocValue { Key = "IDNumber", Value = dataList.ElementAt(0).MemberServiceIDNumber });
-                values.Add(new CLDocValue { Key = "PhysicalAddress", Value = dataList.ElementAt(0).MemberServiceRequestPhysicalAddress });
-                values.Add(new CLDocValue { Key = "IdIssueStates", Value = dataList.ElementAt(0).MemberServiceRequestIDIssueState });
-                values.Add(new CLDocValue { Key = "IssuingDate", Value = dataList.ElementAt(0).MemberServiceRequestIDIssueDate });
-                values.Add(new CLDocValue { Key = "CityZip", Value = dataList.ElementAt(0).MemberServiceCityStateZip2 });
-                values.Add(new CLDocValue { Key = "IDExpDate", Value = dataList.ElementAt(0).MemberServiceIDExpDate });
-                values.Add(new CLDocValue { Key = "DOB", Value = !string.IsNullOrEmpty(dataList.ElementAt(0).MemberServiceDOB) ? dataList.ElementAt(0).MemberServiceDOB.Split(' ').ElementAt(0) : "" });
-                values.Add(new CLDocValue { Key = "HomePhone", Value = dataList.ElementAt(0).MemberServiceHomePhone });
-                values.Add(new CLDocValue { Key = "Email", Value = dataList.ElementAt(0).MemberServiceEmail });
-                values.Add(new CLDocValue { Key = "CellPhone", Value = dataList.ElementAt(0).MemberServiceCell });
-                values.Add(new CLDocValue { Key = "WorkPhone", Value = dataList.ElementAt(0).MemberServiceWorkPhone });
-                values.Add(new CLDocValue { Key = "Employer", Value = dataList.ElementAt(0).MemberServiceEmployer });
-                values.Add(new CLDocValue { Key = "OccupationTitle", Value = dataList.ElementAt(0).MemberServiceOccupationTitle });
-                values.Add(new CLDocValue { Key = "SSNTIN", Value = dataList.ElementAt(0).RetailAccountChangeSSNNumber });
-                values.Add(new CLDocValue { Key = "SSN", Value = dataList.ElementAt(0).RetailAccountChangeSSNNumber });
-                values.Add(new CLDocValue { Key = "ScoreDetails", Value = dataList.ElementAt(0).ScoreDetails });
+                    values.Add(new CLDocValue { Key = "BENEFICIARYPOD", Value = dataList.ElementAt(0).BenDesiBeneficiary });
+                   
 
+                    if (!string.IsNullOrEmpty(dataList.ElementAt(0).BenificiaryDocDetails))
+                    { 
+                        List<string> BenDetails = new List<string>();
+                        BenDetails = dataList.ElementAt(0).BenificiaryDocDetails.Split(new[] { '±' }, StringSplitOptions.RemoveEmptyEntries).ToList();//split each beneficary
+                        
 
-                #region Account Types
-                int countShareSaving = 0;
-                int countClubSaving = 0;
-                int countChecking = 0;
-                int countCertificate = 0;
-                int countCertificate1 = 0;
-                int countMoneyMarket = 0;
-                int countHighRateSavings = 0;
-                int countDepositeAccount1 = 0;
-                int countDepositeAccount2 = 0;
-                int countDepositeAccount3 = 0;
-                string ShareSaving = string.Empty;
-                string ClubSaving = string.Empty;
-                string Checking = string.Empty;
-                string Certificate = string.Empty;
-                string Certificate1 = string.Empty;
-                string MoneyMarket = string.Empty;
-                string HighRateSaving = string.Empty;
-                string DepositeAccount1 = string.Empty;
-                string DepositeAccount2 = string.Empty;
-                string DepositeAccount3 = string.Empty;
-
-                List<string> SavingProducts = new List<string>();
-                List<string> CheckingProducts = new List<string>();
-                List<string> CertificateProducts = new List<string>();
-                List<string> AllAccounts = new List<string>();
-                if (!string.IsNullOrEmpty(dataList.ElementAt(0).SavingProducts))
-                    SavingProducts = dataList.ElementAt(0).SavingProducts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                if (!string.IsNullOrEmpty(dataList.ElementAt(0).CheckingProducts))
-                    CheckingProducts = dataList.ElementAt(0).CheckingProducts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                if (!string.IsNullOrEmpty(dataList.ElementAt(0).CertificateProducts))
-                    CertificateProducts = dataList.ElementAt(0).CertificateProducts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-                AllAccounts.AddRange(SavingProducts);
-                AllAccounts.AddRange(CheckingProducts);
-                AllAccounts.AddRange(CertificateProducts);
-
-                if (AllAccounts.Count() > 0)
-                {
-                    foreach (var account in AllAccounts)
-                    {
-                        if (account.IndexOf('-') > 0)
+                        for (int i = 0; i < BenDetails.Count() ; i++)  
                         {
-                            switch (account.Substring(0, account.IndexOf('-')).Trim())
+                            if (!String.IsNullOrEmpty(BenDetails[i]))
                             {
-                                case "Regular Savings":
-                                case "Share Savings":
-                                    if (countShareSaving < 3)
-                                    {
-                                        ShareSaving += account + "; ";
-                                        countShareSaving++;
-                                    }
-                                    else if (countDepositeAccount1 < 3)
-                                    {
-                                        DepositeAccount1 += account + "; ";
-                                        countDepositeAccount1++;
-                                    }
-                                    else if (countDepositeAccount2 < 3)
-                                    {
-                                        DepositeAccount2 += account + "; ";
-                                        countDepositeAccount2++;
-                                    }
-                                    else if (countDepositeAccount3 < 3)
-                                    {
-                                        DepositeAccount3 += account + "; ";
-                                        countDepositeAccount3++;
-                                    }
-                                    break;
-                                case "Club Savings":
-                                    if (countClubSaving < 3)
-                                    {
-                                        ClubSaving += account + "; ";
-                                        countClubSaving++;
-                                    }
-                                    else if (countDepositeAccount1 < 3)
-                                    {
-                                        DepositeAccount1 += account + "; ";
-                                        countDepositeAccount1++;
-                                    }
-                                    else if (countDepositeAccount2 < 3)
-                                    {
-                                        DepositeAccount2 += account + "; ";
-                                        countDepositeAccount2++;
-                                    }
-                                    else if (countDepositeAccount3 < 3)
-                                    {
-                                        DepositeAccount3 += account + "; ";
-                                        countDepositeAccount3++;
-                                    }
-                                    break;
-                                case "A+ Checking":
-                                case "A+ Platinum Checking":
-                                case "Free Checking":
-                                case "Platinum":
-                                case "Checking":
-                                    if (countChecking < 3)
-                                    {
-                                        Checking += account + "; ";
-                                        countChecking++;
-                                    }
-                                    else if (countDepositeAccount1 < 3)
-                                    {
-                                        DepositeAccount1 += account + "; ";
-                                        countDepositeAccount1++;
-                                    }
-                                    else if (countDepositeAccount2 < 3)
-                                    {
-                                        DepositeAccount2 += account + "; ";
-                                        countDepositeAccount2++;
-                                    }
-                                    else if (countDepositeAccount3 < 3)
-                                    {
-                                        DepositeAccount3 += account + "; ";
-                                        countDepositeAccount3++;
-                                    }
-                                    break;
-                                case "6 month":
-                                case "12 month":
-                                case "13 month special":
-                                case "13 month Rochester Special":
-                                case "18 month":
-                                case "24 month":
-                                case "31 month special":
-                                case "31 Month Rochester special":
-                                case "36 month":
-                                case "48 month":
-                                case "60 month":
-                                case "Graduation Certificate":
-                                case "Grow Up Certificate":
-                                case "First Time Homebuyers Certificate":
-                                case "Certificate":
-                                    if (countCertificate < 3)
-                                    {
-                                        Certificate += account + "; ";
-                                        countCertificate++;
-                                    }
-                                    else if (countCertificate1 < 3)
-                                    {
-                                        Certificate1 += account + "; ";
-                                        countCertificate1++;
-                                    }
-                                    else if (countDepositeAccount1 < 3)
-                                    {
-                                        DepositeAccount1 += account + "; ";
-                                        countDepositeAccount1++;
-                                    }
-                                    else if (countDepositeAccount2 < 3)
-                                    {
-                                        DepositeAccount2 += account + "; ";
-                                        countDepositeAccount2++;
-                                    }
-                                    else if (countDepositeAccount3 < 3)
-                                    {
-                                        DepositeAccount3 += account + "; ";
-                                        countDepositeAccount3++;
-                                    }
-                                    break;
-                                case "Best Life Money Market":
-                                case "Indexed Money Market":
-                                case "Money Market":
-                                    if (countMoneyMarket < 3)
-                                    {
-                                        MoneyMarket += account + "; ";
-                                        countMoneyMarket++;
-                                    }
-                                    else if (countDepositeAccount1 < 3)
-                                    {
-                                        DepositeAccount1 += account + "; ";
-                                        countDepositeAccount1++;
-                                    }
-                                    else if (countDepositeAccount2 < 3)
-                                    {
-                                        DepositeAccount2 += account + "; ";
-                                        countDepositeAccount2++;
-                                    }
-                                    else if (countDepositeAccount3 < 3)
-                                    {
-                                        DepositeAccount3 += account + "; ";
-                                        countDepositeAccount3++;
-                                    }
-                                    break;
-
-                                case "High Rate Savings":
-                                    if (countHighRateSavings < 3)
-                                    {
-                                        HighRateSaving += account + "; ";
-                                        countHighRateSavings++;
-                                    }
-                                    else if (countDepositeAccount1 < 3)
-                                    {
-                                        DepositeAccount1 += account + "; ";
-                                        countDepositeAccount1++;
-                                    }
-                                    else if (countDepositeAccount2 < 3)
-                                    {
-                                        DepositeAccount2 += account + "; ";
-                                        countDepositeAccount2++;
-                                    }
-                                    else if (countDepositeAccount3 < 3)
-                                    {
-                                        DepositeAccount3 += account + "; ";
-                                        countDepositeAccount3++;
-                                    }
-                                    break;
-                                default:
-                                    if (countDepositeAccount1 < 3)
-                                    {
-                                        DepositeAccount1 += account + "; ";
-                                        countDepositeAccount1++;
-                                    }
-                                    else if (countDepositeAccount2 < 3)
-                                    {
-                                        DepositeAccount2 += account + "; ";
-                                        countDepositeAccount2++;
-                                    }
-                                    else if (countDepositeAccount3 < 3)
-                                    {
-                                        DepositeAccount3 += account + "; ";
-                                        countDepositeAccount3++;
-                                    }
-                                    break;
+                                string[] values1 = BenDetails[i].Split('¶');
+                                int count = values1.Count();
+                                if (count > 1)
+                                    values.Add(new CLDocValue { Key = $"BNameRelationship{i + 1}", Value = values1[0] + "/" + values1[1] });
+                                if (count > 2)
+                                    values.Add(new CLDocValue { Key = $"BDOB{i + 1}", Value = values1[2] });
+                                if (count > 3)
+                                    values.Add(new CLDocValue { Key = $"BSSN{i + 1}", Value = Utility.DecryptText(values1[3]) });
                             }
                         }
                     }
-                }
-                values.Add(new CLDocValue { Key = "ShareSaving", Value = ShareSaving });
-                values.Add(new CLDocValue { Key = "ClubSaving", Value = ClubSaving });
-                values.Add(new CLDocValue { Key = "Checking", Value = Checking });
-                values.Add(new CLDocValue { Key = "Certificate", Value = Certificate });
-                values.Add(new CLDocValue { Key = "Certificate1", Value = Certificate1 });
-                values.Add(new CLDocValue { Key = "MoneyMarket", Value = MoneyMarket });
-                values.Add(new CLDocValue { Key = "HighRateSaving", Value = HighRateSaving });
-                values.Add(new CLDocValue { Key = "DepositeAccount1", Value = DepositeAccount1 });
-                values.Add(new CLDocValue { Key = "DepositeAccount2", Value = DepositeAccount2 });
-                values.Add(new CLDocValue { Key = "DepositeAccount3", Value = DepositeAccount3 });
-                values.Add(new CLDocValue { Key = "chkDepositeAccount3", Value = "true" });
-                if (!string.IsNullOrEmpty(ShareSaving))
-                    values.Add(new CLDocValue { Key = "ShareSavChk", Value = "true" });
-                if (!string.IsNullOrEmpty(ClubSaving))
-                    values.Add(new CLDocValue { Key = "ClubSavChk", Value = "true" });
-                if (!string.IsNullOrEmpty(Checking))
-                    values.Add(new CLDocValue { Key = "CheckingChk", Value = "true" });
-                if (!string.IsNullOrEmpty(Certificate))
-                    values.Add(new CLDocValue { Key = "chkcertificate", Value = "true" });
-                if (!string.IsNullOrEmpty(Certificate1))
-                    values.Add(new CLDocValue { Key = "chkcertificate2", Value = "true" });
-                if (!string.IsNullOrEmpty(MoneyMarket))
-                    values.Add(new CLDocValue { Key = "chkMoneyMarket", Value = "true" });
-                if (!string.IsNullOrEmpty(HighRateSaving))
-                    values.Add(new CLDocValue { Key = "ChkHighRateSaving", Value = "true" });
-                if (!string.IsNullOrEmpty(DepositeAccount1))
-                    values.Add(new CLDocValue { Key = "ChkDepositAccount1", Value = "true" });
-                if (!string.IsNullOrEmpty(DepositeAccount2))
-                    values.Add(new CLDocValue { Key = "ChkDepositAccount2", Value = "true" });
-                if (!string.IsNullOrEmpty(DepositeAccount3))
-                    values.Add(new CLDocValue { Key = "ChkDepositAccount3", Value = "true" });
 
-                #endregion
+                    //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiMemberNumber });
+                    //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameDate });
+                    //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameDOB });
+                    //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameRelationShip });
+                    //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).BenDesiNameSSNNumber });
+                    //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).DirectDepositVeriFullName });
+                    //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).DirectDepositSavings });
+                    //values.Add(new CLDocValue { Key = "", Value = dataList.ElementAt(0).DirectDepositCheckings });
 
-                #region MemberServiceRequest, Services Section Filling with OD Account Label and Account Number
-                if (!string.IsNullOrEmpty(dataList.ElementAt(0).OverDraftAccounts))
-                {
-                    List<string> ODAccounts = new List<string>();
-                    ODAccounts = dataList.ElementAt(0).OverDraftAccounts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                    if (ODAccounts.Count() > 0)
-                        values.Add(new CLDocValue { Key = $"OverDraft", Value = "true" });
-                    for (int i = 1; i <= ODAccounts.Count(); i++)
+                    #region signerDetails
+                    signerDetails.Add(new SignerInfo()
                     {
-                        if (i <= 4)
+                        ReciName = dataList.ElementAt(0).MemberServiceRequestFullName,
+                        ReciEmail = dataList.ElementAt(0).MemberServiceEmail,
+                        ReciId = Convert.ToString(++recepientLoop),
+                        IsInPerson = dataList.ElementAt(0).IsInPersonSigner
+                    });
+                    #endregion
+                    values.Add(new CLDocValue { Key = "DNAUser", Value = CUName });
+                    values.Add(new CLDocValue { Key = "date", Value = DateTime.Now.ToString("MM/dd/yyyy") });
+                    values.Add(new CLDocValue { Key = "Date", Value = DateTime.Now.ToString("MM/dd/yyyy") });
+                    values.Add(new CLDocValue { Key = "MemberFullName", Value = dataList.ElementAt(0).MemberServiceRequestFullName });
+                    values.Add(new CLDocValue { Key = "MemberNo", Value = dataList.ElementAt(0).MemberServiceRequestMemberInfo });
+                    values.Add(new CLDocValue { Key = "MemberName", Value = dataList.ElementAt(0).MemberServiceRequestFullName });
+                    values.Add(new CLDocValue { Key = "MailingAddress", Value = dataList.ElementAt(0).MemberServiceRequestMailingAddress });
+                    values.Add(new CLDocValue { Key = "IdType", Value = dataList.ElementAt(0).MemberServiceRequestIDType });
+                    values.Add(new CLDocValue { Key = "City", Value = dataList.ElementAt(0).MemberServiceCityStateZip1 });
+                    values.Add(new CLDocValue { Key = "MemberCity", Value = dataList.ElementAt(0).MemberCity });
+                    values.Add(new CLDocValue { Key = "MemberState", Value = dataList.ElementAt(0).MemberState });
+                    values.Add(new CLDocValue { Key = "MemberZip", Value = dataList.ElementAt(0).MemberZip });
+                    values.Add(new CLDocValue { Key = "IDNumber", Value = dataList.ElementAt(0).MemberServiceIDNumber });
+                    values.Add(new CLDocValue { Key = "PhysicalAddress", Value = dataList.ElementAt(0).MemberServiceRequestPhysicalAddress });
+                    values.Add(new CLDocValue { Key = "IdIssueStates", Value = dataList.ElementAt(0).MemberServiceRequestIDIssueState });
+                    values.Add(new CLDocValue { Key = "IssuingDate", Value = dataList.ElementAt(0).MemberServiceRequestIDIssueDate });
+                    values.Add(new CLDocValue { Key = "CityZip", Value = dataList.ElementAt(0).MemberServiceCityStateZip2 });
+                    values.Add(new CLDocValue { Key = "IDExpDate", Value = dataList.ElementAt(0).MemberServiceIDExpDate });
+                    values.Add(new CLDocValue { Key = "DOB", Value = !string.IsNullOrEmpty(dataList.ElementAt(0).MemberServiceDOB) ? dataList.ElementAt(0).MemberServiceDOB.Split(' ').ElementAt(0) : "" });
+                    values.Add(new CLDocValue { Key = "HomePhone", Value = dataList.ElementAt(0).MemberServiceHomePhone });
+                    values.Add(new CLDocValue { Key = "Email", Value = dataList.ElementAt(0).MemberServiceEmail });
+                    values.Add(new CLDocValue { Key = "CellPhone", Value = dataList.ElementAt(0).MemberServiceCell });
+                    values.Add(new CLDocValue { Key = "WorkPhone", Value = dataList.ElementAt(0).MemberServiceWorkPhone });
+                    values.Add(new CLDocValue { Key = "Employer", Value = dataList.ElementAt(0).MemberServiceEmployer });
+                    values.Add(new CLDocValue { Key = "OccupationTitle", Value = dataList.ElementAt(0).MemberServiceOccupationTitle });
+                    values.Add(new CLDocValue { Key = "SSNTIN", Value = dataList.ElementAt(0).RetailAccountChangeSSNNumber });
+                    values.Add(new CLDocValue { Key = "SSN", Value = dataList.ElementAt(0).RetailAccountChangeSSNNumber });
+                    values.Add(new CLDocValue { Key = "ScoreDetails", Value = dataList.ElementAt(0).ScoreDetails });
+
+
+                    #region Account Types
+                    int countShareSaving = 0;
+                    int countClubSaving = 0;
+                    int countChecking = 0;
+                    int countCertificate = 0;
+                    int countCertificate1 = 0;
+                    int countMoneyMarket = 0;
+                    int countHighRateSavings = 0;
+                    int countDepositeAccount1 = 0;
+                    int countDepositeAccount2 = 0;
+                    int countDepositeAccount3 = 0;
+                    string ShareSaving = string.Empty;
+                    string ClubSaving = string.Empty;
+                    string Checking = string.Empty;
+                    string Certificate = string.Empty;
+                    string Certificate1 = string.Empty;
+                    string MoneyMarket = string.Empty;
+                    string HighRateSaving = string.Empty;
+                    string DepositeAccount1 = string.Empty;
+                    string DepositeAccount2 = string.Empty;
+                    string DepositeAccount3 = string.Empty;
+
+                    List<string> SavingProducts = new List<string>();
+                    List<string> CheckingProducts = new List<string>();
+                    List<string> CertificateProducts = new List<string>();
+                    List<string> AllAccounts = new List<string>();
+                    if (!string.IsNullOrEmpty(dataList.ElementAt(0).SavingProducts))
+                        SavingProducts = dataList.ElementAt(0).SavingProducts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    if (!string.IsNullOrEmpty(dataList.ElementAt(0).CheckingProducts))
+                        CheckingProducts = dataList.ElementAt(0).CheckingProducts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    if (!string.IsNullOrEmpty(dataList.ElementAt(0).CertificateProducts))
+                        CertificateProducts = dataList.ElementAt(0).CertificateProducts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                    AllAccounts.AddRange(SavingProducts);
+                    AllAccounts.AddRange(CheckingProducts);
+                    AllAccounts.AddRange(CertificateProducts);
+
+                    if (AllAccounts.Count() > 0)
+                    {
+                        foreach (var account in AllAccounts)
                         {
-                            values.Add(new CLDocValue { Key = $"services{i}", Value = ODAccounts.ElementAt(i - 1) });
+                            if (account.IndexOf('-') > 0)
+                            {
+                                switch (account.Substring(0, account.IndexOf('-')).Trim())
+                                {
+                                    case "Regular Savings":
+                                    case "Share Savings":
+                                        if (countShareSaving < 3)
+                                        {
+                                            ShareSaving += account + "; ";
+                                            countShareSaving++;
+                                        }
+                                        else if (countDepositeAccount1 < 3)
+                                        {
+                                            DepositeAccount1 += account + "; ";
+                                            countDepositeAccount1++;
+                                        }
+                                        else if (countDepositeAccount2 < 3)
+                                        {
+                                            DepositeAccount2 += account + "; ";
+                                            countDepositeAccount2++;
+                                        }
+                                        else if (countDepositeAccount3 < 3)
+                                        {
+                                            DepositeAccount3 += account + "; ";
+                                            countDepositeAccount3++;
+                                        }
+                                        break;
+                                    case "Club Savings":
+                                        if (countClubSaving < 3)
+                                        {
+                                            ClubSaving += account + "; ";
+                                            countClubSaving++;
+                                        }
+                                        else if (countDepositeAccount1 < 3)
+                                        {
+                                            DepositeAccount1 += account + "; ";
+                                            countDepositeAccount1++;
+                                        }
+                                        else if (countDepositeAccount2 < 3)
+                                        {
+                                            DepositeAccount2 += account + "; ";
+                                            countDepositeAccount2++;
+                                        }
+                                        else if (countDepositeAccount3 < 3)
+                                        {
+                                            DepositeAccount3 += account + "; ";
+                                            countDepositeAccount3++;
+                                        }
+                                        break;
+                                    case "A+ Checking":
+                                    case "A+ Platinum Checking":
+                                    case "Free Checking":
+                                    case "Platinum":
+                                    case "Checking":
+                                        if (countChecking < 3)
+                                        {
+                                            Checking += account + "; ";
+                                            countChecking++;
+                                        }
+                                        else if (countDepositeAccount1 < 3)
+                                        {
+                                            DepositeAccount1 += account + "; ";
+                                            countDepositeAccount1++;
+                                        }
+                                        else if (countDepositeAccount2 < 3)
+                                        {
+                                            DepositeAccount2 += account + "; ";
+                                            countDepositeAccount2++;
+                                        }
+                                        else if (countDepositeAccount3 < 3)
+                                        {
+                                            DepositeAccount3 += account + "; ";
+                                            countDepositeAccount3++;
+                                        }
+                                        break;
+                                    case "6 month":
+                                    case "12 month":
+                                    case "13 month special":
+                                    case "13 month Rochester Special":
+                                    case "18 month":
+                                    case "24 month":
+                                    case "31 month special":
+                                    case "31 Month Rochester special":
+                                    case "36 month":
+                                    case "48 month":
+                                    case "60 month":
+                                    case "Graduation Certificate":
+                                    case "Grow Up Certificate":
+                                    case "First Time Homebuyers Certificate":
+                                    case "Certificate":
+                                        if (countCertificate < 3)
+                                        {
+                                            Certificate += account + "; ";
+                                            countCertificate++;
+                                        }
+                                        else if (countCertificate1 < 3)
+                                        {
+                                            Certificate1 += account + "; ";
+                                            countCertificate1++;
+                                        }
+                                        else if (countDepositeAccount1 < 3)
+                                        {
+                                            DepositeAccount1 += account + "; ";
+                                            countDepositeAccount1++;
+                                        }
+                                        else if (countDepositeAccount2 < 3)
+                                        {
+                                            DepositeAccount2 += account + "; ";
+                                            countDepositeAccount2++;
+                                        }
+                                        else if (countDepositeAccount3 < 3)
+                                        {
+                                            DepositeAccount3 += account + "; ";
+                                            countDepositeAccount3++;
+                                        }
+                                        break;
+                                    case "Best Life Money Market":
+                                    case "Indexed Money Market":
+                                    case "Money Market":
+                                        if (countMoneyMarket < 3)
+                                        {
+                                            MoneyMarket += account + "; ";
+                                            countMoneyMarket++;
+                                        }
+                                        else if (countDepositeAccount1 < 3)
+                                        {
+                                            DepositeAccount1 += account + "; ";
+                                            countDepositeAccount1++;
+                                        }
+                                        else if (countDepositeAccount2 < 3)
+                                        {
+                                            DepositeAccount2 += account + "; ";
+                                            countDepositeAccount2++;
+                                        }
+                                        else if (countDepositeAccount3 < 3)
+                                        {
+                                            DepositeAccount3 += account + "; ";
+                                            countDepositeAccount3++;
+                                        }
+                                        break;
+
+                                    case "High Rate Savings":
+                                        if (countHighRateSavings < 3)
+                                        {
+                                            HighRateSaving += account + "; ";
+                                            countHighRateSavings++;
+                                        }
+                                        else if (countDepositeAccount1 < 3)
+                                        {
+                                            DepositeAccount1 += account + "; ";
+                                            countDepositeAccount1++;
+                                        }
+                                        else if (countDepositeAccount2 < 3)
+                                        {
+                                            DepositeAccount2 += account + "; ";
+                                            countDepositeAccount2++;
+                                        }
+                                        else if (countDepositeAccount3 < 3)
+                                        {
+                                            DepositeAccount3 += account + "; ";
+                                            countDepositeAccount3++;
+                                        }
+                                        break;
+                                    default:
+                                        if (countDepositeAccount1 < 3)
+                                        {
+                                            DepositeAccount1 += account + "; ";
+                                            countDepositeAccount1++;
+                                        }
+                                        else if (countDepositeAccount2 < 3)
+                                        {
+                                            DepositeAccount2 += account + "; ";
+                                            countDepositeAccount2++;
+                                        }
+                                        else if (countDepositeAccount3 < 3)
+                                        {
+                                            DepositeAccount3 += account + "; ";
+                                            countDepositeAccount3++;
+                                        }
+                                        break;
+                                }
+                            }
                         }
                     }
-                }
-                #endregion
+                    values.Add(new CLDocValue { Key = "ShareSaving", Value = ShareSaving });
+                    values.Add(new CLDocValue { Key = "ClubSaving", Value = ClubSaving });
+                    values.Add(new CLDocValue { Key = "Checking", Value = Checking });
+                    values.Add(new CLDocValue { Key = "Certificate", Value = Certificate });
+                    values.Add(new CLDocValue { Key = "Certificate1", Value = Certificate1 });
+                    values.Add(new CLDocValue { Key = "MoneyMarket", Value = MoneyMarket });
+                    values.Add(new CLDocValue { Key = "HighRateSaving", Value = HighRateSaving });
+                    values.Add(new CLDocValue { Key = "DepositeAccount1", Value = DepositeAccount1 });
+                    values.Add(new CLDocValue { Key = "DepositeAccount2", Value = DepositeAccount2 });
+                    values.Add(new CLDocValue { Key = "DepositeAccount3", Value = DepositeAccount3 });
+                    values.Add(new CLDocValue { Key = "chkDepositeAccount3", Value = "true" });
+                    if (!string.IsNullOrEmpty(ShareSaving))
+                        values.Add(new CLDocValue { Key = "ShareSavChk", Value = "true" });
+                    if (!string.IsNullOrEmpty(ClubSaving))
+                        values.Add(new CLDocValue { Key = "ClubSavChk", Value = "true" });
+                    if (!string.IsNullOrEmpty(Checking))
+                        values.Add(new CLDocValue { Key = "CheckingChk", Value = "true" });
+                    if (!string.IsNullOrEmpty(Certificate))
+                        values.Add(new CLDocValue { Key = "chkcertificate", Value = "true" });
+                    if (!string.IsNullOrEmpty(Certificate1))
+                        values.Add(new CLDocValue { Key = "chkcertificate2", Value = "true" });
+                    if (!string.IsNullOrEmpty(MoneyMarket))
+                        values.Add(new CLDocValue { Key = "chkMoneyMarket", Value = "true" });
+                    if (!string.IsNullOrEmpty(HighRateSaving))
+                        values.Add(new CLDocValue { Key = "ChkHighRateSaving", Value = "true" });
+                    if (!string.IsNullOrEmpty(DepositeAccount1))
+                        values.Add(new CLDocValue { Key = "ChkDepositAccount1", Value = "true" });
+                    if (!string.IsNullOrEmpty(DepositeAccount2))
+                        values.Add(new CLDocValue { Key = "ChkDepositAccount2", Value = "true" });
+                    if (!string.IsNullOrEmpty(DepositeAccount3))
+                        values.Add(new CLDocValue { Key = "ChkDepositAccount3", Value = "true" });
 
-                #region Direct Deposit & Account Verification Saving and Checking Filling
-                values.Add(new CLDocValue { Key = "DDSavings", Value = dataList.ElementAt(0).SavingProducts });
-                values.Add(new CLDocValue { Key = "DDChecking", Value = dataList.ElementAt(0).CheckingProducts });
-                #endregion
+                    #endregion
 
-                #region CreditScore
-                if (!string.IsNullOrEmpty(dataList.ElementAt(0).CreditScore))
-                {
-                    values.Add(new CLDocValue { Key = "CreditScore", Value = dataList.ElementAt(0).CreditScore });
-                    if (Convert.ToInt32(dataList.ElementAt(0).CreditScore) < 620)
+                    #region MemberServiceRequest, Services Section Filling with OD Account Label and Account Number
+                    if (!string.IsNullOrEmpty(dataList.ElementAt(0).OverDraftAccounts))
                     {
-                        values.Add(new CLDocValue { Key = "sectionAChk1", Value = "true" });
-                        values.Add(new CLDocValue { Key = "sectionBChk1", Value = "true" });
+                        List<string> ODAccounts = new List<string>();
+                        ODAccounts = dataList.ElementAt(0).OverDraftAccounts.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                        if (ODAccounts.Count() > 0)
+                            values.Add(new CLDocValue { Key = $"OverDraft", Value = "true" });
+                        for (int i = 1; i <= ODAccounts.Count(); i++)
+                        {
+                            if (i <= 4)
+                            {
+                                values.Add(new CLDocValue { Key = $"services{i}", Value = ODAccounts.ElementAt(i - 1) });
+                            }
+                        }
                     }
+                    #endregion
+
+                    #region Direct Deposit & Account Verification Saving and Checking Filling
+                    values.Add(new CLDocValue { Key = "DDSavings", Value = dataList.ElementAt(0).SavingProducts });
+                    values.Add(new CLDocValue { Key = "DDChecking", Value = dataList.ElementAt(0).CheckingProducts });
+                    #endregion
+
+                    #region CreditScore
+                    if (!string.IsNullOrEmpty(dataList.ElementAt(0).CreditScore))
+                    {
+                        values.Add(new CLDocValue { Key = "CreditScore", Value = dataList.ElementAt(0).CreditScore });
+                        if (Convert.ToInt32(dataList.ElementAt(0).CreditScore) < 620)
+                        {
+                            values.Add(new CLDocValue { Key = "sectionAChk1", Value = "true" });
+                            values.Add(new CLDocValue { Key = "sectionBChk1", Value = "true" });
+                        }
+                    }
+                    #endregion
+
+                    #region Certificate
+                    //List<string> certAccNos = new List<string>();
+                    //certAccNos = dataList.ElementAt(0).CertificateAccountNumbers.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    //if (certAccNos.Count() > 0) //Need to Implement logic for downloading multiple documents
+                    //{
+                    values.Add(new CLDocValue { Key = "accountNo", Value = accountNo });
+                    //}
+                    #endregion
+
+                    #region AccountReceipt MemberName Filling
+                    for (int i = 0; i < dataList.Count(); i++)
+                    {
+                        values.Add(new CLDocValue { Key = $"accountOwners{i + 1}", Value = dataList.ElementAt(i).MemberServiceRequestFullName });
+
+                    }
+                    #endregion
                 }
-                #endregion
 
-                #region Certificate
-                //List<string> certAccNos = new List<string>();
-                //certAccNos = dataList.ElementAt(0).CertificateAccountNumbers.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                //if (certAccNos.Count() > 0) //Need to Implement logic for downloading multiple documents
-                //{
-                values.Add(new CLDocValue { Key = "accountNo", Value = accountNo });
-                //}
-                #endregion
 
-                #region AccountReceipt MemberName Filling
-                for (int i = 0; i < dataList.Count(); i++)
+                for (int loop = 1; loop < dataList.Count; loop++)
                 {
-                    values.Add(new CLDocValue { Key = $"accountOwners{i + 1}", Value = dataList.ElementAt(i).MemberServiceRequestFullName });
-
+                    SetDocuSignFields(dataList[loop], values, jointSignerDetails, loop, Convert.ToString(++recepientLoop));
                 }
-                #endregion
-            }
 
 
-            for (int loop = 1; loop < dataList.Count; loop++)
-            {
-                SetDocuSignFields(dataList[loop], values, jointSignerDetails, loop, Convert.ToString(++recepientLoop));
-            }
-
-
-            //switch (type)
-            //{
-            //    case "Type3":
-            //    case "Type4":
-            sDocInfo.CUSignerDetails = new List<SignerInfo>()
+                //switch (type)
+                //{
+                //    case "Type3":
+                //    case "Type4":
+                sDocInfo.CUSignerDetails = new List<SignerInfo>()
                     {
                 new SignerInfo() {
                     ReciName =CUName,
@@ -800,16 +883,21 @@ namespace DocuSignAPI
                     ReciId=Convert.ToString(++recepientLoop)
                         }
                     };
-            //        break;
-            //    default:
-            //        break;
-            //}
+                //        break;
+                //    default:
+                //        break;
+                //}
 
-            sDocInfo.DocuSignFields = values;
-            sDocInfo.SignerDetails = signerDetails;
-            sDocInfo.JointSignerDetails = jointSignerDetails;
+                sDocInfo.DocuSignFields = values;
+                sDocInfo.SignerDetails = signerDetails;
+                sDocInfo.JointSignerDetails = jointSignerDetails;
 
-            return sDocInfo;
+                return sDocInfo;
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
         private void SetDocuSignFields(DocumentFields dataList, List<CLDocValue> values, List<SignerInfo> jointSignerDetails, int loop, string reciID)
         {
@@ -935,7 +1023,7 @@ namespace DocuSignAPI
             int recepientLoop = 0;
 
             SendDocumentInfo sDocInfo = new SendDocumentInfo();
-
+            List<SignerInfo> signerDetails = new List<SignerInfo>();
             List<SignerInfo> jointSignerDetails = new List<SignerInfo>();
 
             List<CLDocValue> values = new List<CLDocValue>();
@@ -959,6 +1047,16 @@ namespace DocuSignAPI
                 values.Add(new CLDocValue { Key = "DateofBirth1", Value = dataList.ElementAt(0).RetailAccountChangeDOB });
                 values.Add(new CLDocValue { Key = "Occupation1", Value = dataList.ElementAt(0).RetailAccountChangeOccupation });
                 values.Add(new CLDocValue { Key = "Email1", Value = dataList.ElementAt(0).RetailAccountChangeEmail });
+
+                #region signerDetails
+                signerDetails.Add(new SignerInfo()
+                {
+                    ReciName = dataList.ElementAt(0).MemberServiceRequestFullName,
+                    ReciEmail = dataList.ElementAt(0).MemberServiceEmail,
+                    ReciId = Convert.ToString(++recepientLoop),
+                    IsInPerson = dataList.ElementAt(0).IsInPersonSigner
+                });
+                #endregion
 
                 #region Account Types
                 int countShareSaving = 0;
@@ -1225,7 +1323,24 @@ namespace DocuSignAPI
                 SetDocuSignFieldsRetailAccountChange(dataList[loop], values, (loop + 1));
             }
 
+
+            for (int loop = 1; loop < dataList.Count; loop++)
+            {
+                SetDocuSignFields(dataList[loop], values, jointSignerDetails, loop, Convert.ToString(++recepientLoop));
+            }
+
+            sDocInfo.CUSignerDetails = new List<SignerInfo>()
+                    {
+                new SignerInfo() {
+                    ReciName =CUName,
+                    ReciEmail=CUEmail,
+                    ReciId=Convert.ToString(++recepientLoop)
+                        }
+                    };
+
             sDocInfo.DocuSignFields = values;
+            sDocInfo.SignerDetails = signerDetails;
+            sDocInfo.JointSignerDetails = jointSignerDetails;
             return sDocInfo;
         }
         private void SetDocuSignFieldsRetailAccountChange(DocumentFields dataList, List<CLDocValue> values, int loop)

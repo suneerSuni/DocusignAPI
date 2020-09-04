@@ -77,7 +77,7 @@ namespace FillTheDoc.Model
         public string BenDesiNameSSNNumber
         {
             get { return _benDesiNameSSNNumber ?? string.Empty; }
-            set { _benDesiNameSSNNumber = value; }
+            set { _benDesiNameSSNNumber = SSNDecrypt(value); }
 
         }
 
@@ -342,7 +342,7 @@ namespace FillTheDoc.Model
         public string RetailAccountChangeSSNNumber
         {
             get { return _RetailAccountChangeSSNNumber ?? string.Empty; }
-            set { _RetailAccountChangeSSNNumber = value; }
+            set { _RetailAccountChangeSSNNumber =SSNDecrypt(value); }
 
         }
 
@@ -587,6 +587,35 @@ namespace FillTheDoc.Model
 
         }
 
+        private string _lname;
+        public string Lname
+        {
+            get { return _lname ?? string.Empty; }
+            set { _lname = value; }
+
+        }
+        private string _fname;
+        public string Fname
+        {
+            get { return _fname ?? string.Empty; }
+            set { _fname = value; }
+
+        }
+        private string _regularsavingsaccountnumber;
+
+        public string RegularSavingAccountNumber
+        {
+            get { return _regularsavingsaccountnumber ?? string.Empty; }
+            set { _regularsavingsaccountnumber = value; }
+        }
+          
+        private string _benificiarydocdetails;
+
+        public string BenificiaryDocDetails
+        {
+            get { return _benificiarydocdetails ?? string.Empty; }
+            set { _benificiarydocdetails = value; }
+        }
         public string ToDateCase(string d)
         {
             string result = string.Empty;
@@ -596,11 +625,15 @@ namespace FillTheDoc.Model
             }
             return result;
         }
-
-
+        public string SSNDecrypt(string value)
+        {
+            string result = value;
+            if (!string.IsNullOrEmpty(value))
+            {
+                result = DocuSign.Utils.Utility.DecryptText(value);
+            }
+            return result;
+        }
     }
-
-
-
-
+   
 }

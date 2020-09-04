@@ -19,7 +19,7 @@ namespace DocuSignAPI
         SVCResults SendforESign(int id, string CUName, string CUEmail);
 
         [OperationContract]
-        SVCResults FillDocument(int id, string CUName, string CUEmail,string DocuName,int dCount,string accountNo);
+        SVCResults FillDocument(int id, string CUName, string CUEmail,string DocuName,int dCount,string accountNo,string docType);
 
         [OperationContract]
         string test(string data);

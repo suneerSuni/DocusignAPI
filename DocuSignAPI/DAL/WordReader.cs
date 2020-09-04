@@ -71,7 +71,7 @@ namespace FillTheDoc.DAL
                 byte[] inArray = this.SetMultipleWordDataFromPlaceHolder(fileString, docVal, tblDocVal);
 
                 if (Utility.IsEventLogged) Utility.LogAction("Save successful");
-                return Convert.ToBase64String(inArray);
+                  return Convert.ToBase64String(inArray);              
             }
             catch (Exception ex)
             {

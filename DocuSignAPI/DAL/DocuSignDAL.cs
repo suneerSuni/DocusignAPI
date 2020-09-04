@@ -4,6 +4,7 @@ using DocuSign.eSign.Client;
 using DocuSign.eSign.Model;
 using DocuSign.Utils;
 using DocuSignAPI.Model;
+using DocuSignService.Util;
 using FillTheDoc.Model;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,8 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Web;
 using System.Xml;
 using System.Xml.Serialization;
@@ -27,7 +30,16 @@ namespace FillTheDoc.DAL
         string _email = "";
         string _integratorKey = "";
 
-        bool _canExecuteRequest = true;
+        bool _canExecuteRequest = true;     
+       
+        string _downloadFileLocation = "";
+        string _impUser = "";
+        string _impPwd = "";
+        string _impDomain = "";
+        bool _isImpersonate = false;
+
+      
+       
         #endregion
 
         public DocuSignDAL()
@@ -43,6 +55,14 @@ namespace FillTheDoc.DAL
             }
             _integratorKey = ConfigurationManager.AppSettings["DocuSignIntegratorKey"];
             _apiUrl = ConfigurationManager.AppSettings["DocuSignBasePath"];
+
+            _downloadFileLocation = ConfigurationManager.AppSettings["DownloadFileLocation"];
+            _impUser = ConfigurationManager.AppSettings["ImperosonationUser"];
+            _impPwd = ConfigurationManager.AppSettings["ImperosonationPwd"];
+            _impDomain = ConfigurationManager.AppSettings["ImperosonationDomain"];
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["IsImpersonate"]))
+                _isImpersonate = ConfigurationManager.AppSettings["IsImpersonate"].ToLower() == "true" ? true : false;
+
 
             ApiClient apiClient = new ApiClient(_apiUrl);
             DocuSign.eSign.Client.Configuration.Default.ApiClient = apiClient;
@@ -581,6 +601,42 @@ namespace FillTheDoc.DAL
                         textTab1.Font = "TimesNewRoman";
                         cuSigner.Tabs.TextTabs.Add(textTab1);
 
+                        Text textTab2 = new Text();
+                        textTab2.DocumentId = "1";
+                        textTab2.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                        textTab2.AnchorString = "RetailComment$1nput";
+                        textTab2.TabLabel = "RetailComment";
+                        textTab2.AnchorXOffset = "0";
+                        textTab2.AnchorYOffset = "-3";
+                        textTab2.AnchorUnits = "pixels";
+                        textTab2.AnchorIgnoreIfNotPresent = "true";
+                        textTab2.AnchorMatchWholeWord = "true";
+                        textTab2.Required = "false";
+                        textTab2.Width = "75";
+                        textTab2.Height = "15";
+                        textTab2.FontSize = "Size10";
+                        textTab2.Font = "TimesNewRoman";
+
+                        cuSigner.Tabs.TextTabs.Add(textTab2);
+
+                        Text textTab3 = new Text();
+                        textTab3.DocumentId = "1";
+                        textTab3.RecipientId = docDetails.CUSignerDetails[i].ReciId;
+                        textTab3.AnchorString = "Retailemployeeinfo$1nput";
+                        textTab3.TabLabel = "Retailemployeeinfo";
+                        textTab3.AnchorXOffset = "0";
+                        textTab3.AnchorYOffset = "-3";
+                        textTab3.AnchorUnits = "pixels";
+                        textTab3.AnchorIgnoreIfNotPresent = "true";
+                        textTab3.AnchorMatchWholeWord = "true";
+                        textTab3.Required = "false";
+                        textTab3.Width = "75";
+                        textTab3.Height = "15";
+                        textTab3.FontSize = "Size10";
+                        textTab3.Font = "TimesNewRoman";
+
+                        cuSigner.Tabs.TextTabs.Add(textTab3);
+
                         for (int c = 1; c <= 5; c++)
                         {
                             Checkbox checkBox = new Checkbox();
@@ -670,6 +726,80 @@ namespace FillTheDoc.DAL
 
         }
 
+        
+
+        public void SaveToLocation(byte[] docBytes, string docuName,string MemberNumber,string SSN,string FirstName,string LastName,string RegAccountNo,int Id,string accountNo="",int Dcount=0)
+        {
+            try
+            {
+                string CompletedDateTime = DateTime.Now.ToString(@"MM-dd-yyyy").Replace('-', '/');
+                string IndexFileName = "Index-" + DateTime.Now.ToString(@"MM-dd-yyyy") + ".csv";
+
+                string logFilePath = _downloadFileLocation;
+                string[] doc = docuName.Split('.');
+                docuName = doc[0];
+                string documentType = GetDocType(docuName);
+
+                if ( (accountNo== "") || (Dcount==0))
+                {
+                    docuName = docuName + Id + ".docx";
+                }
+                else
+                {
+                    docuName = docuName + Id + Dcount + ".docx"; 
+                }
+
+                if (_isImpersonate)
+                {
+                    using (new Impersonator(_impUser, _impDomain, _impPwd))
+                    {
+                        if (!Directory.Exists(logFilePath))
+                        {
+                            Directory.CreateDirectory(logFilePath);
+                            DirectoryInfo directoryInfo = new DirectoryInfo(logFilePath);
+                            DirectorySecurity accessControl = directoryInfo.GetAccessControl();
+                            accessControl.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                            directoryInfo.SetAccessControl(accessControl);
+                        }
+                        using (StreamWriter streamWriter = new StreamWriter(string.Concat(logFilePath, "\\", IndexFileName), true))
+                        {
+                            
+                         streamWriter.WriteLine(string.Concat(new string[] {
+                         $@"{documentType}|{MemberNumber}|{SSN}|{LastName}|{FirstName}|{logFilePath}\{docuName}|{CompletedDateTime}|{RegAccountNo}"
+                }));
+                            streamWriter.Close();
+                        }
+                     
+                        System.IO.File.WriteAllBytes(logFilePath + @"\" + docuName, docBytes);
+                    }
+                }
+                else
+                {
+                    if (!Directory.Exists(logFilePath))
+                    {
+                        Directory.CreateDirectory(logFilePath);
+                        DirectoryInfo directoryInfo = new DirectoryInfo(logFilePath);
+                        DirectorySecurity accessControl = directoryInfo.GetAccessControl();
+                        accessControl.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+                        directoryInfo.SetAccessControl(accessControl);
+                    }
+                    using (StreamWriter streamWriter = new StreamWriter(string.Concat(logFilePath, "\\", IndexFileName), true))
+                    {
+                        streamWriter.WriteLine(string.Concat(new string[] {
+                    $@"{documentType}|{MemberNumber}|{SSN}|{LastName}|{FirstName}|{logFilePath}\{docuName}|{CompletedDateTime}|{RegAccountNo}"
+                }));
+                        streamWriter.Close();
+                    }
+                                    
+                    System.IO.File.WriteAllBytes(logFilePath + @"\" + docuName, docBytes);
+                }
+            }
+            catch (Exception ex)
+            {
+                Utility.LogAction("Save to location failed with error: " + ex.Message);
+                Utility.LogAction("StackTrace: " + ex.StackTrace);               
+            }
+        }
         #endregion
 
 
@@ -717,6 +847,42 @@ namespace FillTheDoc.DAL
             return Utility.DocuSignAccountID = loginInfo.LoginAccounts[0].AccountId;
         }
 
+        #region savetoloc
+       
+        private string GetDocType(string docName)
+        {
+            string docType = string.Empty;
+            switch (docName)
+            {
+                case "MemberServiceRequest":
+                    docType = "Member Services Request";
+                    break;
+                case "BeneficiaryDesignation":
+                    docType = "Beneficiary Designation";
+                    break;
+                case "OverdraftServicesConsentForm":
+                    docType = "Overdraft Services Consent";
+                    break;
+                case "RetailAccountChangeForm":
+                    docType = "Account Change Form";
+                    break;
+                default:
+                    if (docName.Contains("OverdraftServicesConsentForm"))
+                    {
+                        docType = "Overdraft Services Consent";
+                    }
+                    else
+                    {
+                        docType = docName;
+                    }
+                    break;
+            }
+            return docType;
+        }
         #endregion
+
+
     }
+    #endregion
+
 }
