@@ -740,6 +740,7 @@ namespace FillTheDoc.DAL
                 docuName = doc[0];
                 string documentType = GetDocType(docuName);
 
+                string fileformat = "12";//12 for docx and doc
                 if ( (accountNo== "") || (Dcount==0))
                 {
                     docuName = docuName + Id + ".docx";
@@ -765,7 +766,7 @@ namespace FillTheDoc.DAL
                         {
                             
                          streamWriter.WriteLine(string.Concat(new string[] {
-                         $@"{documentType}|{MemberNumber}|{SSN}|{LastName}|{FirstName}|{logFilePath}\{docuName}|{CompletedDateTime}|{RegAccountNo}"
+                         $@"{documentType}|{MemberNumber}|{SSN}|{LastName}|{FirstName}|{logFilePath}\{docuName}|{CompletedDateTime}|{RegAccountNo}|{fileformat}"
                 }));
                             streamWriter.Close();
                         }
@@ -786,7 +787,7 @@ namespace FillTheDoc.DAL
                     using (StreamWriter streamWriter = new StreamWriter(string.Concat(logFilePath, "\\", IndexFileName), true))
                     {
                         streamWriter.WriteLine(string.Concat(new string[] {
-                    $@"{documentType}|{MemberNumber}|{SSN}|{LastName}|{FirstName}|{logFilePath}\{docuName}|{CompletedDateTime}|{RegAccountNo}"
+                    $@"{documentType}|{MemberNumber}|{SSN}|{LastName}|{FirstName}|{logFilePath}\{docuName}|{CompletedDateTime}|{RegAccountNo}|{fileformat}"
                 }));
                         streamWriter.Close();
                     }
@@ -866,6 +867,19 @@ namespace FillTheDoc.DAL
                 case "RetailAccountChangeForm":
                     docType = "Account Change Form";
                     break;
+                case "AltraFoundationApplication":
+                    docType = "Altra Foundation Membership Application";
+                    break;
+                case "DirectDepositAccountVerification":
+                    docType = "Direct Deposit - Account Verification";
+                    break;
+                case "AccountReceipt":
+                    docType = "Account Receipt";
+                    break;
+                case "AdverseAction":
+                    docType = "Adverse Action";
+                    break;
+
                 default:
                     if (docName.Contains("OverdraftServicesConsentForm"))
                     {

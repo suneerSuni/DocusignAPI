@@ -265,7 +265,7 @@ namespace DocuSignAPI
                 string lastname = dataList[0].Lname;
                 string RegAccountNumber = dataList[0].RegularSavingAccountNumber;
 
-                if (docType=="NonSignatureDocument")
+                if ((docType == "NonSignatureDocument") && (DocuName != "IndexedMoneyMarketDisclosure.docx"))
                 {
                     dalObj.SaveToLocation(filearray, DocuName, membernumber, SSN, firstname, lastname, RegAccountNumber,id,accountNo,dCount);
                 }
